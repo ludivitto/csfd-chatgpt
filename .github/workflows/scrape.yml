@@ -2,8 +2,8 @@ name: Scrape CSFD
 
 on:
   schedule:
-    - cron: "0 3 * * 1"
-  workflow_dispatch: {}
+    - cron: "0 3 * * 1"   # weekly
+  workflow_dispatch: {}    # allow manual runs
 
 jobs:
   scrape:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          # cache: "npm"  ← pryč, když nemáme package-lock.json
+          # ⚠️ nic o "cache" tady nechtej
 
       - name: Install deps (Playwright + Chromium)
         run: |
@@ -24,7 +24,7 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Run scraper
-        run: npm run scrape
+        run: node scrape_csfd.mjs
 
       - name: Commit CSV (if changed)
         run: |
