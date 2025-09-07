@@ -19,8 +19,8 @@ function toCsv(rows) {
 }
 
 async function parsePage(page, url) {
-  await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
-  await page.waitForSelector('#snippet--ratings table.striped tbody tr', { timeout: 10_000 }).catch(() => {});
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.waitForSelector('#snippet--ratings table.striped tbody tr', { timeout: 20000 });
 
   const items = await page.$$eval('#snippet--ratings table.striped tbody tr', (trs) => {
     const rows = [];
