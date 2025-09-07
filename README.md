@@ -34,6 +34,7 @@ Instead of browsing ČSFD manually, I can now query my dataset directly.
 ```excel
 =IMPORTDATA("https://raw.githubusercontent.com/<USER>/<REPO>/main/data/csfd_ratings.csv")
 ```
+- Do not forget to have your repo PUBLIC so Google Sheets can access it
 
 ## 🛠️ Technical Details
 
