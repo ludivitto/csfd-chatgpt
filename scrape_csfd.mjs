@@ -1,4 +1,4 @@
-// CSFD → CSV (GitHub Actions + Playwright)
+// CSFD → CSV (GitHub Actions + Playwright, robustní verze)
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 
@@ -7,6 +7,7 @@ const MAX_PAGES = 2000;
 const DELAY_MS = 350;
 const OUT_DIR = "data";
 const OUT_FILE = `${OUT_DIR}/csfd_ratings.csv`;
+const DEBUG_DIR = "debug";
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const pageUrl = (n) => (n === 1 ? BASE : `${BASE}?page=${n}`);
@@ -18,9 +19,37 @@ function toCsv(rows) {
   return [header.join(","), ...rows.map(o => header.map(h => esc(o[h])).join(","))].join("\n");
 }
 
-async function parsePage(page, url) {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  await page.waitForSelector('#snippet--ratings table.striped tbody tr', { timeout: 20000 });
+async function acceptCookies(page) {
+  try {
+    const btnSel = 'button[id^="didomi-notice-agree-button"], #didomi-notice-agree-button';
+    const iframeSel = 'iframe[src*="didomi"]';
+    const btn = await page.$(btnSel);
+    if (btn) { await btn.click({ timeout: 2000 }).catch(()=>{}); return; }
+    const ifr = await page.$(iframeSel);
+    if (ifr) {
+      const frame = await ifr.contentFrame();
+      const fbtn = await frame.$(btnSel);
+      if (fbtn) await fbtn.click({ timeout: 2000 }).catch(()=>{});
+    }
+  } catch {}
+}
+
+async function pageDump(page, tag) {
+  try {
+    await fs.mkdir(DEBUG_DIR, { recursive: true });
+    await page.screenshot({ path: `${DEBUG_DIR}/screenshot_${tag}.png`, fullPage: true }).catch(()=>{});
+    const html = await page.content().catch(()=>"<no content>");
+    await fs.writeFile(`${DEBUG_DIR}/page_${tag}.html`, html, "utf8").catch(()=>{});
+  } catch {}
+}
+
+async function parsePage(page, url, tag) {
+  // méně přísné čekání: DOMContentLoaded (ne networkidle)
+  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 }).catch(()=>{});
+  await acceptCookies(page);
+
+  // explicitně počkej na tabulku, ale neshazuj běh kvůli timeoutu
+  await page.waitForSelector('#snippet--ratings table.striped tbody tr', { timeout: 20_000 }).catch(()=>{});
 
   const items = await page.$$eval('#snippet--ratings table.striped tbody tr', (trs) => {
     const rows = [];
@@ -55,20 +84,35 @@ async function parsePage(page, url) {
       rows.push({ title, year, type, rating, ratingDate, url });
     }
     return rows;
-  });
+  }).catch(() => []);
+
+  if (!items.length) {
+    // udělej dump, ať víme, co se načetlo (pomůže při anti-botu)
+    await pageDump(page, tag || "noparse");
+  }
 
   for (const it of items) it.url = abs(it.url);
   return items;
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({
+  const browser = await chromium.launch({
+    headless: true,
+    // drobné „stealth-ish“ flagy a sandbox fix pro GHA
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-blink-features=AutomationControlled"
+    ],
+  });
+
+  const context = await browser.newContext({
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
       "(KHTML, like Gecko) Chrome/125 Safari/537.36",
     locale: "cs-CZ",
   });
+  const page = await context.newPage();
 
   const all = [];
   const seen = new Set();
@@ -77,9 +121,16 @@ async function main() {
     const url = pageUrl(p);
     console.log("Page:", url);
 
-    const items = await parsePage(page, url);
+    // jednoduchý retry (2x) – občas síť/blokace
+    let items = [];
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      items = await parsePage(page, url, `p${p}_a${attempt}`);
+      if (items.length) break;
+      await sleep(1200);
+    }
+
     if (!items.length) {
-      console.log("→ prázdná stránka, končím.");
+      console.log("→ stránka bez položek (viz debug/), končím.");
       break;
     }
 
@@ -105,4 +156,9 @@ async function main() {
   console.log(`OK: ${all.length} řádků → ${OUT_FILE}`);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch(async (e) => {
+  console.error("FATAL:", e);
+  try { await fs.mkdir(DEBUG_DIR, { recursive: true }); } catch {}
+  try { await fs.writeFile(`${DEBUG_DIR}/error.txt`, String(e.stack || e), "utf8"); } catch {}
+  process.exit(1);
+});
