@@ -7,22 +7,33 @@ This repository contains a GitHub Actions workflow that automatically scrapes al
 
 The scraper also enriches the dataset with **IMDb links**.
 
+## ❓ Why
+The purpose of this project is to **feed ChatGPT with my ratings** so I can simply ask questions like:
+
+- *“Have I seen film X? How did I rate it?”*  
+- *“Show me my top-rated sci-fi from the last 10 years.”*  
+- *“What comedies did I give 4 stars or more?”*  
+
+Instead of browsing ČSFD manually, I can now query my dataset directly.
+
 ## 📂 Output
 
 - Data is stored in: `data/csfd_ratings.csv`
 - The file contains the following columns: `title, year, type, rating, ratingDate, url, imdb_id, imdb_url`
 
-## 🚀 How to Run
+## 🚀 How
 
-### Manually
-1. Go to the **Actions** tab in GitHub
-2. Select the **Scrape CSFD** workflow
-3. Click **Run workflow**
-4. After it finishes, the updated `csfd_ratings.csv` will be committed to the repo
+### Workflow
+- **GitHub Actions** runs a Playwright scraper on a schedule (every Monday at 03:00 UTC) or manually.  
+- It fetches all rating pages from ČSFD, extracts the relevant fields, visits detail pages to grab IMDb IDs, and commits the results into `data/csfd_ratings.csv`.  
+- If something fails, debug screenshots/HTML are uploaded as workflow artifacts.
 
-### Automatically
-- The workflow is scheduled to run every Monday at **03:00 UTC**
-- You can adjust the interval in `.github/workflows/scrape.yml` under the `schedule` section
+### Using the data
+- Open the CSV directly via the **blue badge** above.  
+- Import into **Google Sheets**:
+```excel
+=IMPORTDATA("https://raw.githubusercontent.com/<USER>/<REPO>/main/data/csfd_ratings.csv")
+```
 
 ## 🛠️ Technical Details
 
@@ -50,5 +61,6 @@ node scrape_csfd.mjs
 
 ## ✅ With this setup
 
-- The green badge shows whether the workflow is passing
-- The blue badge links directly to the latest CSV file with ČSFD ratings + IMDb enrichment
+- The green badge shows whether the workflow is passing.
+- The blue badge links directly to the latest CSV file with ČSFD ratings + IMDb enrichment.
+- And most importantly: the dataset gives ChatGPT the knowledge of what I’ve seen and how I rated it.
