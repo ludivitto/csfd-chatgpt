@@ -32,7 +32,8 @@ jobs:
 
       # 4) Run the scraper (produces data/csfd_ratings.csv and data/csfd_ratings.json)
       - name: Run scraper
-        run: node scrape_csfd.mjs
+        # run: node scrape_csfd.mjs
+        run: node scrape_csfd.mjs --maxPages 1 # for testing
 
       # 5) Commit only if data has changed
       - name: Commit data if changed
