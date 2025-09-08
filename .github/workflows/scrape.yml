@@ -4,8 +4,25 @@ on:
   # Weekly schedule (Mon 03:00 UTC). Adjust as needed.
   schedule:
     - cron: "0 3 * * 1"
-  # Allow manual runs from the Actions tab.
-  workflow_dispatch: {}
+  # Allow manual runs with test mode selection
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'Scraping mode'
+        required: true
+        default: 'test-small'
+        type: choice
+        options:
+        - 'ultra-fast'       # --test --skipDetails (~30s)
+        - 'test-small'       # --maxItems 10 (~2min)
+        - 'test-medium'      # --maxPages 2 (~5min)
+        - 'test-large'       # --maxPages 5 (~15min)
+        - 'production'       # Full run (3+ hours)
+      verbose:
+        description: 'Enable verbose logging'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   scrape:
@@ -30,14 +47,40 @@ jobs:
           npm i
           npx playwright install --with-deps chromium
 
-      # 4) Run the scraper - TESTING OPTIONS
-      - name: Run scraper
-        # Choose based on needs:
-        # run: node scrape_csfd.mjs --test --skipDetails              # Ultra fast test (~30s)
-        # run: node scrape_csfd.mjs --maxItems 10 --verbose           # Test with 10 items (~2min)  
-        run: node scrape_csfd.mjs --maxPages 2 --verbose            # Test 2 pages with details (~5min)
-        # run: node scrape_csfd.mjs --maxPages 1                        # Current test (1 page)
-        # run: node scrape_csfd.mjs --verbose                         # Production run (3900 ratings)
+      # 4) Run the scraper with selected mode
+      - name: Run scraper (${{ github.event.inputs.test_mode || 'test-small' }})
+        run: |
+          VERBOSE_FLAG=""
+          if [ "${{ github.event.inputs.verbose }}" = "true" ]; then
+            VERBOSE_FLAG="--verbose"
+          fi
+          
+          case "${{ github.event.inputs.test_mode || 'test-small' }}" in
+            "ultra-fast")
+              echo "🚀 Ultra fast test (~30 seconds)"
+              node scrape_csfd.mjs --test --skipDetails $VERBOSE_FLAG
+              ;;
+            "test-small")
+              echo "🧪 Small test - 10 items (~2 minutes)"
+              node scrape_csfd.mjs --maxItems 10 $VERBOSE_FLAG
+              ;;
+            "test-medium")
+              echo "📄 Medium test - 2 pages (~5 minutes)"
+              node scrape_csfd.mjs --maxPages 2 $VERBOSE_FLAG
+              ;;
+            "test-large")
+              echo "📚 Large test - 5 pages (~15 minutes)"
+              node scrape_csfd.mjs --maxPages 5 $VERBOSE_FLAG
+              ;;
+            "production")
+              echo "🏭 Production run - all data (3+ hours)"
+              node scrape_csfd.mjs $VERBOSE_FLAG
+              ;;
+            *)
+              echo "❌ Unknown test mode: ${{ github.event.inputs.test_mode }}"
+              exit 1
+              ;;
+          esac
 
       # 5) Commit only if data has changed
       - name: Commit data if changed
