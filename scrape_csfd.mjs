@@ -264,14 +264,16 @@ async function parseListPage(page, url, tag) {
 /** Extract IMDb (robust: several selectors + HTML regex fallback) */
 async function extractImdbOnPage(page) {
   try {
-    // 1) Obvious selectors
     const selectors = [
-      'a[href*="imdb.com/title/tt"]',
-      'a[href*="imdb.com/title/"]',
-      'a[href*="://www.imdb.com/title/"]',
-      'a.imdb',
-      '.imdb a',
-      'a[href*="imdb"]',
+      'a.button-imdb',                     // 🆕 HLAVNÍ - přesně to co vidíš
+      '.button-imdb',                      // 🆕 BACKUP
+      'a.button.button-imdb',              // 🆕 ÚPLNÝ selektor
+      'a[href*="imdb.com/title/tt"]',      // ✅ FUNGUJE
+      'a[href*="imdb.com/title/"]',        // ✅ FUNGUJE  
+      'a[href*="://www.imdb.com/title/"]', // ✅ FUNGUJE
+      'a.imdb',                            // 🗑️ STARÝ
+      '.imdb a',                           // 🗑️ STARÝ
+      'a[href*="imdb"]',                   // ✅ OBECNÝ
     ];
     for (const sel of selectors) {
       const a = await page.$(sel);
@@ -319,12 +321,15 @@ async function extractImdbOnPage(page) {
 async function extractOriginalTitleOnPage(page) {
   try {
     const selectors = [
-      ".film-header-name .original",
-      ".film-header-name .original-name",
-      ".names .original",
-      "span.original, span.original-name",
-      "h1 small",
-      '[data-testid="original-title"]',
+      ".film-names li:first-child",           // 🆕 NOVÝ layout ČSFD
+      ".film-header-name .film-names li",     // 🆕 Specifičtější selektor
+      ".film-names li",                       // 🆕 Obecnější
+      ".film-header-name .original",          // Existující
+      ".film-header-name .original-name",     // Existující  
+      ".names .original",                     // Existující
+      "span.original, span.original-name",    // Existující
+      "h1 small",                             // Existující
+      '[data-testid="original-title"]',       // Existující
     ];
     for (const sel of selectors) {
       const el = await page.$(sel);
