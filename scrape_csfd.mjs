@@ -4,28 +4,127 @@
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 
+// Parse CLI flags - ROZŠÍŘENÉ
+const argv = process.argv.slice(2);
+
+const maxPagesFlag = (() => {
+  const idx = argv.indexOf("--maxPages");
+  if (idx >= 0 && argv[idx + 1]) return Math.max(1, Number(argv[idx + 1]) || 1);
+  return null;
+})();
+
+// NOVÉ testovací flagy
+const maxItemsFlag = (() => {
+  const idx = argv.indexOf("--maxItems");
+  if (idx >= 0 && argv[idx + 1]) return Math.max(1, Number(argv[idx + 1]) || 1);
+  return null;
+})();
+
+const testModeFlag = argv.includes("--test");
+const skipDetailsFlag = argv.includes("--skipDetails");
+const headlessFlag = !argv.includes("--headful");
+const verboseFlag = argv.includes("--verbose");
+const resumeFlag = argv.includes("--resume");
+const cacheFlag = !argv.includes("--no-cache");
+
+
 /** ────────────────────────────────
- *  CONFIG
+ *  CONFIG - DYNAMICKÉ PODLE TESTŮ
  *  ──────────────────────────────── */
 const BASE = "https://www.csfd.cz/uzivatel/2544-ludivitto/hodnoceni/";
-const MAX_PAGES = 2000;
+const MAX_PAGES = maxPagesFlag || (testModeFlag ? 1 : 2000);
+const MAX_ITEMS = maxItemsFlag || (testModeFlag ? 5 : null);
 
-const PAGINATION_DELAY_MS = 350;     // pause between paginated list requests
-const DETAIL_CONCURRENCY = 4;        // number of concurrent detail fetchers
-const DETAIL_DELAY_MS = 250;         // short pause between detail requests
+// Rychlejší nastavení pro testy
+const PAGINATION_DELAY_MS = testModeFlag ? 100 : 350;
+const DETAIL_CONCURRENCY = testModeFlag ? 2 : 4;
+const DETAIL_DELAY_MS = testModeFlag ? 50 : 250;
+const BATCH_SIZE = testModeFlag ? 10 : 100;
 
 const OUT_DIR = "data";
-const OUT_CSV = `${OUT_DIR}/csfd_ratings.csv`;
-const OUT_JSON = `${OUT_DIR}/csfd_ratings.json`;
+const timestamp = testModeFlag ? `_test_${Date.now()}` : "";
+const OUT_CSV = `${OUT_DIR}/csfd_ratings${timestamp}.csv`;
+const OUT_JSON = `${OUT_DIR}/csfd_ratings${timestamp}.json`;
+const CACHE_FILE = `${OUT_DIR}/scraper_cache.json`;
+const STATE_FILE = `${OUT_DIR}/scraper_state.json`;
 
 const DEBUG_DIR = "debug";
 
 /** ────────────────────────────────
- *  HELPERS
+ *  HELPERS - OPTIMALIZOVANÉ
  *  ──────────────────────────────── */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const pageUrl = (n) => (n === 1 ? BASE : `${BASE}?page=${n}`);
 const abs = (u) => new URL(u, BASE).href;
+
+// Cache management
+let cache = new Map();
+async function loadCache() {
+  if (!cacheFlag) return;
+  try {
+    const data = await fs.readFile(CACHE_FILE, 'utf8');
+    const parsed = JSON.parse(data);
+    cache = new Map(Object.entries(parsed));
+    if (verboseFlag) console.log(`[cache] loaded ${cache.size} entries`);
+  } catch {
+    if (verboseFlag) console.log('[cache] no existing cache found');
+  }
+}
+
+async function saveCache() {
+  if (!cacheFlag) return;
+  try {
+    await fs.mkdir(OUT_DIR, { recursive: true });
+    const obj = Object.fromEntries(cache);
+    await fs.writeFile(CACHE_FILE, JSON.stringify(obj, null, 2), 'utf8');
+    if (verboseFlag) console.log(`[cache] saved ${cache.size} entries`);
+  } catch (e) {
+    console.warn('[cache] failed to save:', e.message);
+  }
+}
+
+// State management pro resume
+async function loadState() {
+  if (!resumeFlag) return null;
+  try {
+    const data = await fs.readFile(STATE_FILE, 'utf8');
+    const state = JSON.parse(data);
+    console.log(`[resume] continuing from page ${state.lastPage}, ${state.items.length} items`);
+    return state;
+  } catch {
+    console.log('[resume] no previous state found, starting fresh');
+    return null;
+  }
+}
+
+async function saveState(page, items) {
+  try {
+    await fs.mkdir(OUT_DIR, { recursive: true });
+    const state = { lastPage: page, items, timestamp: Date.now() };
+    await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+  } catch (e) {
+    console.warn('[state] failed to save:', e.message);
+  }
+}
+
+// Retry s exponential backoff
+async function withRetry(fn, maxRetries = 3, baseDelay = 1000, context = '') {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (i === maxRetries - 1) {
+        if (verboseFlag) console.error(`[retry] ${context} failed after ${maxRetries} attempts:`, e.message);
+        throw e;
+      }
+      const delay = baseDelay * Math.pow(2, i);
+      if (verboseFlag) console.warn(`[retry] ${context} attempt ${i + 1} failed, retrying in ${delay}ms`);
+      await sleep(delay);
+    }
+  }
+}
+
+
 
 /** Convert array of objects to CSV string */
 function toCsv(rows) {
@@ -62,8 +161,11 @@ async function pageDump(page, tag) {
   } catch {}
 }
 
-/** Cookie consent (Didomi) if present */
+/** Cookie consent (Didomi) if present - S CACHE */
+let cookiesAccepted = false;
 async function acceptCookies(page) {
+  if (cookiesAccepted) return; // cache pro performance
+  
   try {
     const btnSel =
       'button[id^="didomi-notice-agree-button"], #didomi-notice-agree-button';
@@ -72,27 +174,43 @@ async function acceptCookies(page) {
     const btn = await page.$(btnSel);
     if (btn) {
       await btn.click({ timeout: 2000 }).catch(() => {});
+      cookiesAccepted = true;
+      if (verboseFlag) console.log('[cookies] accepted via direct button');
       return;
     }
     const ifr = await page.$(iframeSel);
     if (ifr) {
       const frame = await ifr.contentFrame();
       const fbtn = await frame.$(btnSel);
-      if (fbtn) await fbtn.click({ timeout: 2000 }).catch(() => {});
+      if (fbtn) {
+        await fbtn.click({ timeout: 2000 }).catch(() => {});
+        cookiesAccepted = true;
+        if (verboseFlag) console.log('[cookies] accepted via iframe');
+      }
     }
-  } catch {}
+  } catch (e) {
+    if (verboseFlag) console.warn('[cookies] error:', e.message);
+  }
 }
 
-/** Parse a single ratings page (list of titles) */
+/** Parse a single ratings page (list of titles) - OPTIMALIZOVANÁ */
 async function parseListPage(page, url, tag) {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 }).catch(() => {});
-  await acceptCookies(page);
-  await page.waitForSelector('#snippet--ratings table.striped tbody tr', {
-    timeout: 20_000,
-  }).catch(() => {});
+  return withRetry(async () => {
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+    await acceptCookies(page);
+    
+    // Čekání na obsah s timeout
+    try {
+      await page.waitForSelector('#snippet--ratings table.striped tbody tr', {
+        timeout: 20_000,
+      });
+    } catch (e) {
+      if (verboseFlag) console.warn(`[parse] no content selector found on ${url}`);
+      await pageDump(page, tag || "noparse");
+      return [];
+    }
 
-  const items = await page
-    .$$eval('#snippet--ratings table.striped tbody tr', (trs) => {
+    const items = await page.$$eval('#snippet--ratings table.striped tbody tr', (trs) => {
       const out = [];
       for (const tr of trs) {
         const link = tr.querySelector(".name .film-title-name");
@@ -131,13 +249,16 @@ async function parseListPage(page, url, tag) {
         out.push({ title, year, type, rating, ratingDate, url });
       }
       return out;
-    })
-    .catch(() => []);
+    });
 
-  if (!items.length) await pageDump(page, tag || "noparse");
+    if (!items.length && verboseFlag) {
+      console.warn(`[parse] no items found on ${url}`);
+      await pageDump(page, tag || "noparse");
+    }
 
-  for (const it of items) it.url = abs(it.url);
-  return items;
+    for (const it of items) it.url = abs(it.url);
+    return items;
+  }, 2, 1500, `parsing ${url}`);
 }
 
 /** Extract IMDb (robust: several selectors + HTML regex fallback) */
@@ -263,10 +384,13 @@ function parentTitleUrl(csfdUrl) {
   return "";
 }
 
-/** Visit detail pages to enrich items with IMDb + original title */
+/** Visit detail pages to enrich items with IMDb + original title - OPTIMALIZOVANÁ */
 async function enrichWithDetails(context, items) {
+  if (items.length === 0) return;
+  
   let idx = 0;
   let done = 0;
+  const total = items.length;
 
   async function worker() {
     while (true) {
@@ -274,84 +398,140 @@ async function enrichWithDetails(context, items) {
       if (i >= items.length) break;
       const it = items[i];
 
+      // Check cache first
+      const cacheKey = `${it.url}::details`;
+      if (cache.has(cacheKey)) {
+        const cached = cache.get(cacheKey);
+        it.imdb_id = cached.imdb_id || "";
+        it.imdb_url = cached.imdb_url || "";
+        it.original_title = cached.original_title || "";
+        done++;
+        if (verboseFlag && done % 10 === 0) {
+          console.log(`[details] cached ${done}/${total}`);
+        }
+        continue;
+      }
+
       try {
         const page = await context.newPage();
 
-        // Go to detail + cookie + small settle time
-        await page
-          .goto(it.url, { waitUntil: "domcontentloaded", timeout: 60_000 })
-          .catch(() => {});
-        await acceptCookies(page);
-        await page.waitForTimeout(400);
+        await withRetry(async () => {
+          // Go to detail + cookie + small settle time
+          await page.goto(it.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+          await acceptCookies(page);
+          await page.waitForTimeout(400);
 
-        // First attempt
-        let { imdb_id, imdb_url } = await extractImdbOnPage(page);
-        let original_title = await extractOriginalTitleOnPage(page);
+          // First attempt
+          let { imdb_id, imdb_url } = await extractImdbOnPage(page);
+          let original_title = await extractOriginalTitleOnPage(page);
 
-        // Quick retry if both are empty (page might still be settling)
-        if (!imdb_id && !original_title) {
-          await page.waitForTimeout(800);
-          const again = await extractImdbOnPage(page);
-          imdb_id = imdb_id || again.imdb_id;
-          imdb_url = imdb_url || again.imdb_url;
-          if (!original_title)
-            original_title = await extractOriginalTitleOnPage(page);
-        }
+          // Quick retry if both are empty (page might still be settling)
+          if (!imdb_id && !original_title) {
+            await page.waitForTimeout(800);
+            const again = await extractImdbOnPage(page);
+            imdb_id = imdb_id || again.imdb_id;
+            imdb_url = imdb_url || again.imdb_url;
+            if (!original_title)
+              original_title = await extractOriginalTitleOnPage(page);
+          }
 
-        // For episodes/seasons/series, try parent page as a fallback
-        if (
-          (!imdb_id || !original_title) &&
-          (it.type === "episode" || it.type === "season" || it.type === "series")
-        ) {
-          const parentUrl = parentTitleUrl(it.url);
-          if (parentUrl) {
-            await page
-              .goto(parentUrl, {
+          // For episodes/seasons/series, try parent page as a fallback
+          if (
+            (!imdb_id || !original_title) &&
+            (it.type === "episode" || it.type === "season" || it.type === "series")
+          ) {
+            const parentUrl = parentTitleUrl(it.url);
+            if (parentUrl) {
+              await page.goto(parentUrl, {
                 waitUntil: "domcontentloaded",
                 timeout: 60_000,
-              })
-              .catch(() => {});
-            await page.waitForTimeout(400);
+              });
+              await page.waitForTimeout(400);
 
-            if (!imdb_id) {
-              const r = await extractImdbOnPage(page);
-              imdb_id = imdb_id || r.imdb_id;
-              imdb_url = imdb_url || r.imdb_url;
-            }
-            if (!original_title) {
-              original_title = await extractOriginalTitleOnPage(page);
+              if (!imdb_id) {
+                const r = await extractImdbOnPage(page);
+                imdb_id = imdb_id || r.imdb_id;
+                imdb_url = imdb_url || r.imdb_url;
+              }
+              if (!original_title) {
+                original_title = await extractOriginalTitleOnPage(page);
+              }
             }
           }
-        }
 
-        it.imdb_id = imdb_id || "";
-        it.imdb_url = imdb_url || "";
-        it.original_title = original_title || "";
+          it.imdb_id = imdb_id || "";
+          it.imdb_url = imdb_url || "";
+          it.original_title = original_title || "";
+
+          // Save to cache
+          cache.set(cacheKey, {
+            imdb_id: it.imdb_id,
+            imdb_url: it.imdb_url,
+            original_title: it.original_title
+          });
+
+        }, 2, 1000, `enriching ${it.url}`);
 
         await page.close();
-      } catch {
+      } catch (e) {
+        if (verboseFlag) console.warn(`[details] failed for ${it.url}:`, e.message);
         it.imdb_id = it.imdb_id || "";
         it.imdb_url = it.imdb_url || "";
         it.original_title = it.original_title || "";
       }
 
       done++;
-      if (done % 50 === 0)
-        console.log(`[details] processed ${done}/${items.length}`);
+      if (done % 25 === 0) {
+        console.log(`[details] processed ${done}/${total}`);
+        await saveCache(); // Periodic cache save
+      }
       await sleep(DETAIL_DELAY_MS);
     }
   }
 
   const workers = Array.from({ length: DETAIL_CONCURRENCY }, () => worker());
   await Promise.all(workers);
+  await saveCache(); // Final cache save
 }
 
 /** ────────────────────────────────
- *  MAIN
+ *  MAIN - OPTIMALIZOVANÁ
  *  ──────────────────────────────── */
 async function main() {
+  // Print usage info
+  if (argv.includes('--help')) {
+    console.log(`
+CSFD Scraper - Usage:
+  node scrape_csfd.mjs [options]
+
+Options:
+  --test              Quick test mode (1 page, 5 items, faster delays)
+  --maxPages N        Limit to N pages (default: 2000, test: 1)
+  --maxItems N        Stop after N items total
+  --skipDetails       Skip IMDb/original title enrichment
+  --headful           Show browser (for debugging)
+  --verbose           Detailed logging
+  --resume            Resume from previous state
+  --no-cache          Disable caching
+  --help              Show this help
+
+Examples:
+  node scrape_csfd.mjs --test --skipDetails    # Ultra fast test (~5s)
+  node scrape_csfd.mjs --maxItems 10           # Test with 10 items (~30s)
+  node scrape_csfd.mjs --maxPages 5            # First 5 pages (~10min)
+  node scrape_csfd.mjs --resume --verbose      # Resume previous run
+`);
+    return;
+  }
+
+  console.log(`[config] MAX_PAGES=${MAX_PAGES}, MAX_ITEMS=${MAX_ITEMS || 'unlimited'}, headless=${headlessFlag}`);
+  if (testModeFlag) console.log('[config] TEST MODE enabled - faster delays');
+  if (skipDetailsFlag) console.log('[config] skipping detail enrichment');
+  
+  await loadCache();
+  
   const browser = await chromium.launch({
-    headless: true,
+    headless: headlessFlag,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
@@ -368,24 +548,33 @@ async function main() {
 
   const page = await context.newPage();
 
-  // 1) Crawl paginated rating pages
-  const all = [];
-  const seen = new Set();
+  // 1) Load previous state if resuming
+  let all = [];
+  let startPage = 1;
+  const previousState = await loadState();
+  if (previousState) {
+    all = previousState.items;
+    startPage = previousState.lastPage + 1;
+    console.log(`[resume] starting from page ${startPage} with ${all.length} existing items`);
+  }
 
-  for (let p = 1; p <= MAX_PAGES; p++) {
+  // 2) Crawl paginated rating pages
+  const seen = new Set(all.map(it => `${it.url}::${it.title}`));
+
+  for (let p = startPage; p <= MAX_PAGES; p++) {
     const url = pageUrl(p);
-    console.log("Page:", url);
+    console.log(`[page] ${p}/${MAX_PAGES}: ${url}`);
 
-    // small retry loop for the list page
     let items = [];
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      items = await parseListPage(page, url, `p${p}_a${attempt}`);
-      if (items.length) break;
-      await sleep(1200);
+    try {
+      items = await parseListPage(page, url, `p${p}`);
+    } catch (e) {
+      console.error(`[page] failed to parse page ${p}:`, e.message);
+      continue;
     }
 
     if (!items.length) {
-      console.log("→ no items on page (see debug/ if needed). Stopping.");
+      console.log("→ no items on page. Stopping.");
       break;
     }
 
@@ -400,35 +589,60 @@ async function main() {
         it.original_title = "";
         all.push(it);
         added++;
+        
+        // Check item limit
+        if (MAX_ITEMS && all.length >= MAX_ITEMS) {
+          console.log(`→ reached max items limit (${MAX_ITEMS}), stopping`);
+          break;
+        }
       }
     }
+    
     console.log(`→ added: ${added}, total: ${all.length}`);
-    if (added === 0) break;
+    if (added === 0 || (MAX_ITEMS && all.length >= MAX_ITEMS)) break;
+
+    // Save state periodically
+    if (p % 5 === 0) {
+      await saveState(p, all);
+    }
 
     await sleep(PAGINATION_DELAY_MS);
   }
 
-  // 2) Enrich with IMDb and original title
-  console.log("[details] enrichment…");
-  await enrichWithDetails(context, all);
-  console.log("[details] done.");
+  // 3) Enrich with IMDb and original title
+  if (!skipDetailsFlag && all.length > 0) {
+    console.log(`[details] enriching ${all.length} items...`);
+    await enrichWithDetails(context, all);
+    console.log("[details] done.");
+  } else if (skipDetailsFlag) {
+    console.log("[details] skipped (--skipDetails flag)");
+  }
 
   await browser.close();
 
-  // 3) Save CSV + JSON
+  // 4) Save CSV + JSON
   await fs.mkdir(OUT_DIR, { recursive: true });
   await fs.writeFile(OUT_CSV, toCsv(all), "utf8");
   await fs.writeFile(OUT_JSON, JSON.stringify(all, null, 2), "utf8");
 
-  // 4) Small summary in logs
+  // 5) Clean up state file on successful completion
+  if (!testModeFlag) {
+    try {
+      await fs.unlink(STATE_FILE);
+    } catch {}
+  }
+
+  // 6) Summary
   const withImdb = all.filter((x) => x.imdb_id).length;
   const withOrig = all.filter((x) => x.original_title).length;
   console.log(`[summary] IMDb IDs: ${withImdb}/${all.length}, original titles: ${withOrig}/${all.length}`);
-  console.log(`OK: ${all.length} rows → ${OUT_CSV} & ${OUT_JSON}`);
+  console.log(`[summary] cache entries: ${cache.size}`);
+  console.log(`✓ ${all.length} rows → ${OUT_CSV} & ${OUT_JSON}`);
 }
 
 main().catch(async (e) => {
-  console.error("FATAL:", e);
+  console.error("💥 FATAL:", e.message);
+  if (verboseFlag) console.error(e.stack);
   try {
     await fs.mkdir(DEBUG_DIR, { recursive: true });
     await fs.writeFile(`${DEBUG_DIR}/error.txt`, String(e.stack || e), "utf8");
