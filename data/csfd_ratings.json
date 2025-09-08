@@ -9,5 +9,104 @@
     "imdb_id": "tt3402138",
     "imdb_url": "https://www.imdb.com/title/tt3402138/",
     "original_title": "The Naked Gun"
+  },
+  {
+    "title": "28 let poté",
+    "year": "2025",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1481241-28-let-pote/",
+    "imdb_id": "tt10548174",
+    "imdb_url": "https://www.imdb.com/title/tt10548174/",
+    "original_title": "28 Years Later"
+  },
+  {
+    "title": "Vetřelec: Země - Nezemě",
+    "year": "2025",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1557488-vetrelec-zeme/1557492-nezeme/",
+    "imdb_id": "tt8788458",
+    "imdb_url": "https://www.imdb.com/title/tt8788458/",
+    "original_title": "Neverland"
+  },
+  {
+    "title": "Vetřelec: Země - Mistr October",
+    "year": "2025",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1557488-vetrelec-zeme/1557493-mistr-october/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Mr. October"
+  },
+  {
+    "title": "Vetřelec: Země - Proměna",
+    "year": "2025",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1557488-vetrelec-zeme/1557494-promena/",
+    "imdb_id": "tt10800758",
+    "imdb_url": "https://www.imdb.com/title/tt10800758/",
+    "original_title": "Metamorphosis"
+  },
+  {
+    "title": "Vetřelec: Země - Pozorování",
+    "year": "2025",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1557488-vetrelec-zeme/1557495-pozorovani/",
+    "imdb_id": "tt35679095",
+    "imdb_url": "https://www.imdb.com/title/tt35679095/",
+    "original_title": "Observation"
+  },
+  {
+    "title": "Vetřelec: Země - Ve vesmíru vás nikdo...",
+    "year": "2025",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "05.09.2025",
+    "url": "https://www.csfd.cz/film/1557488-vetrelec-zeme/1557496-ve-vesmiru-vas-nikdo/",
+    "imdb_id": "tt32572899",
+    "imdb_url": "https://www.imdb.com/title/tt32572899/",
+    "original_title": "In Space, No One..."
+  },
+  {
+    "title": "Superman",
+    "year": "2025",
+    "type": "film",
+    "rating": "3",
+    "ratingDate": "31.08.2025",
+    "url": "https://www.csfd.cz/film/1328563-superman/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Superman"
+  },
+  {
+    "title": "Drahokam",
+    "year": "2019",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "30.08.2025",
+    "url": "https://www.csfd.cz/film/664743-drahokam/",
+    "imdb_id": "tt5727208",
+    "imdb_url": "https://www.imdb.com/title/tt5727208/",
+    "original_title": "Uncut Gems"
+  },
+  {
+    "title": "Colectiv",
+    "year": "2019",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "30.08.2025",
+    "url": "https://www.csfd.cz/film/764858-colectiv/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Kolektiv (festivalový název)"
   }
 ]
