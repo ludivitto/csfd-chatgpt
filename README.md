@@ -179,44 +179,44 @@ The workflow can be triggered manually in the GitHub Actions tab with mode selec
 
 ### 🚀 Quick Start
 ```bash
-# Instalační dependencí a Playwright
+# Install dependencies and Playwright
 npm install
 npx playwright install chromium
 
-# Nejrychle jší test - ověření že vše funguje (~30s)
+# Fastest test - verify everything works (~30s)
 node scrape_csfd.mjs --test --skipDetails
 
-# Test s IMDb extraction (~2min)
+# Test with IMDb extraction (~2min)
 node scrape_csfd.mjs --maxItems 5 --verbose
 
-# Střední test pro vývoj (~5min)
+# Medium test for development (~5min)
 node scrape_csfd.mjs --maxPages 2 --verbose
 ```
 
 ### 🏢 Production Architecture
-- **Paginated scraping**: Postupné čtení stránek s konfiguratelnými delays
-- **Concurrent detail processing**: Paralelní zpracování detail stránek (4 workers)
-- **Smart caching**: Persistent cache pro IMDb data a original titles
-- **State management**: Resume functionality s automatickým ukládáním progress
-- **Robust error handling**: Graceful degradation s retry logikou
+- **Paginated scraping**: Progressive page reading with configurable delays
+- **Concurrent detail processing**: Parallel detail page processing (4 workers)
+- **Smart caching**: Persistent cache for IMDb data and original titles
+- **State management**: Resume functionality with automatic progress saving
+- **Robust error handling**: Graceful degradation with retry logic
 
 ### 🚫 Anti-Detection Strategy
 - **Human-like behavior**: Random delays, realistic browsing patterns
 - **Stealth browser**: Disabled automation features, custom User-Agent
-- **Intelligent cookie handling**: Automatické přijetí GDPR cookies
-- **Rate limiting**: Respektuje server load s adaptive delays
+- **Intelligent cookie handling**: Automatic GDPR cookie acceptance
+- **Rate limiting**: Respects server load with adaptive delays
 
 ### 🛠️ Troubleshooting
-- **Bot protection**: Zkontrolujte `debug` artifacts v GitHub Actions
-- **Cache issues**: Použijte `--no-cache` pro fresh start
-- **Resume problems**: Smažte `data/scraper_state.json` pro clean restart
-- **IMDb extraction fails**: Zkontrolujte debug screenshots v `debug/` adresáři
+- **Bot protection**: Check `debug` artifacts in GitHub Actions
+- **Cache issues**: Use `--no-cache` for fresh start
+- **Resume problems**: Delete `data/scraper_state.json` for clean restart
+- **IMDb extraction fails**: Check debug screenshots in `debug/` directory
 
 ### 📈 Performance Tips
-- **První běh**: Počítejte s 3+ hodinami pro kompletní dataset
-- **Opakované běhy**: Díky cache až 70% rychlejší
-- **Test režimy**: Použijte `--test` nebo `--maxItems` pro rychlé ověření
-- **Resume**: Přerušené běhy pokračujte s `--resume`
+- **First run**: Expect 3+ hours for complete dataset
+- **Repeated runs**: Up to 70% faster thanks to cache
+- **Test modes**: Use `--test` or `--maxItems` for quick verification
+- **Resume**: Continue interrupted runs with `--resume`
 
 ## ⚡ Performance & Reliability
 
