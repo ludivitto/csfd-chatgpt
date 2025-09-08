@@ -4,90 +4,168 @@
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 
-// Parse CLI flags - EXTENDED
-const argv = process.argv.slice(2);
+/** ────────────────────────────────
+ *  CLI UTILITIES
+ *  ──────────────────────────────── */
+function parseCliFlag(name, defaultValue = null) {
+  const argv = process.argv.slice(2);
+  const idx = argv.indexOf(`--${name}`);
+  if (idx >= 0 && argv[idx + 1]) {
+    const value = Number(argv[idx + 1]);
+    return isNaN(value) ? defaultValue : Math.max(1, value);
+  }
+  return defaultValue;
+}
 
-const maxPagesFlag = (() => {
-  const idx = argv.indexOf("--maxPages");
-  if (idx >= 0 && argv[idx + 1]) return Math.max(1, Number(argv[idx + 1]) || 1);
-  return null;
-})();
+function hasCliFlag(name) {
+  return process.argv.includes(`--${name}`);
+}
 
-// NEW testing flags
-const maxItemsFlag = (() => {
-  const idx = argv.indexOf("--maxItems");
-  if (idx >= 0 && argv[idx + 1]) return Math.max(1, Number(argv[idx + 1]) || 1);
-  return null;
-})();
-
-const testModeFlag = argv.includes("--test");
-const skipDetailsFlag = argv.includes("--skipDetails");
-const headlessFlag = !argv.includes("--headful");
-const verboseFlag = argv.includes("--verbose");
-const resumeFlag = argv.includes("--resume");
-const cacheFlag = !argv.includes("--no-cache");
+// Parse CLI flags - CLEAN
+const maxPagesFlag = parseCliFlag('maxPages');
+const maxItemsFlag = parseCliFlag('maxItems');
+const testModeFlag = hasCliFlag('test');
+const skipDetailsFlag = hasCliFlag('skipDetails');
+const headlessFlag = !hasCliFlag('headful');
+const verboseFlag = hasCliFlag('verbose');
+const resumeFlag = hasCliFlag('resume');
+const cacheFlag = !hasCliFlag('no-cache');
 
 
 /** ────────────────────────────────
- *  CONFIG - DYNAMIC BASED ON TESTS
+ *  CONFIG - STRUCTURED
  *  ──────────────────────────────── */
-const BASE = "https://www.csfd.cz/uzivatel/2544-ludivitto/hodnoceni/";
-const MAX_PAGES = maxPagesFlag || (testModeFlag ? 1 : 2000);
-const MAX_ITEMS = maxItemsFlag || (testModeFlag ? 5 : null);
-
-// Faster settings for tests
-const PAGINATION_DELAY_MS = testModeFlag ? 100 : 350;
-const DETAIL_CONCURRENCY = testModeFlag ? 2 : 4;
-const DETAIL_DELAY_MS = testModeFlag ? 50 : 250;
-const BATCH_SIZE = testModeFlag ? 10 : 100;
-
-const OUT_DIR = "data";
-const timestamp = testModeFlag ? `_test_${Date.now()}` : "";
-const OUT_CSV = `${OUT_DIR}/csfd_ratings${timestamp}.csv`;
-const OUT_JSON = `${OUT_DIR}/csfd_ratings${timestamp}.json`;
-const CACHE_FILE = `${OUT_DIR}/scraper_cache.json`;
-const STATE_FILE = `${OUT_DIR}/scraper_state.json`;
-
-const DEBUG_DIR = "debug";
+const config = {
+  // Core settings
+  BASE_URL: "https://www.csfd.cz/uzivatel/2544-ludivitto/hodnoceni/",
+  MAX_PAGES: maxPagesFlag || (testModeFlag ? 1 : 2000),
+  MAX_ITEMS: maxItemsFlag || (testModeFlag ? 5 : null),
+  
+  // Performance settings
+  delays: {
+    pagination: testModeFlag ? 100 : 350,
+    detail: testModeFlag ? 50 : 250,
+    pageSettle: testModeFlag ? 400 : 2000,
+    retry: testModeFlag ? 800 : 1500,
+  },
+  
+  concurrency: {
+    details: testModeFlag ? 2 : 4,
+    batchSize: testModeFlag ? 10 : 100,
+  },
+  
+  // File paths
+  directories: {
+    output: "data",
+    debug: "debug",
+  },
+  
+  get files() {
+    const timestamp = testModeFlag ? `_test_${Date.now()}` : "";
+    const dir = this.directories.output;
+    return {
+      csv: `${dir}/csfd_ratings${timestamp}.csv`,
+      json: `${dir}/csfd_ratings${timestamp}.json`,
+      cache: `${dir}/scraper_cache.json`,
+      state: `${dir}/scraper_state.json`,
+    };
+  },
+  
+  // Browser settings
+  browser: {
+    headless: headlessFlag,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125 Safari/537.36",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox", 
+      "--disable-blink-features=AutomationControlled",
+    ],
+  },
+  
+  // Flags
+  flags: {
+    test: testModeFlag,
+    skipDetails: skipDetailsFlag,
+    verbose: verboseFlag,
+    resume: resumeFlag,
+    cache: cacheFlag,
+  }
+};
 
 /** ────────────────────────────────
  *  HELPERS - OPTIMIZED
  *  ──────────────────────────────── */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const pageUrl = (n) => (n === 1 ? BASE : `${BASE}?page=${n}`);
-const abs = (u) => new URL(u, BASE).href;
+const pageUrl = (n) => (n === 1 ? config.BASE_URL : `${config.BASE_URL}?page=${n}`);
+const abs = (u) => new URL(u, config.BASE_URL).href;
 
-// Cache management
+/** ────────────────────────────────
+ *  TITLE UTILITIES
+ *  ──────────────────────────────── */
+function cleanTitle(title) {
+  if (!title || typeof title !== 'string') return '';
+  return title
+    .trim()
+    .replace(/\s+/g, ' ')                    // Normalize whitespace
+    .replace(/\s*\(více\)\s*$/i, '')         // Remove "(více)"
+    .trim();
+}
+
+function normalizeFilmType(infoText) {
+  if (!infoText) return 'film';
+  const low = infoText.toLowerCase();
+  if (low.includes('seriál')) return 'series';
+  if (low.includes('epizoda')) return 'episode';
+  if (low.includes('série')) return 'season';
+  return 'film';
+}
+
+function extractYear(infoText) {
+  if (!infoText) return '';
+  const match = infoText.match(/\b(19\d{2}|20\d{2})\b/);
+  return match ? match[1] : '';
+}
+
+function extractRating(element) {
+  if (!element) return '';
+  const className = element.className || '';
+  const match = className.match(/stars-(\d)/);
+  return match ? match[1] : '';
+}
+
+/** ────────────────────────────────
+ *  CACHE & STATE MANAGEMENT
+ *  ──────────────────────────────── */
 let cache = new Map();
+
 async function loadCache() {
-  if (!cacheFlag) return;
+  if (!config.flags.cache) return;
   try {
-    const data = await fs.readFile(CACHE_FILE, 'utf8');
+    const data = await fs.readFile(config.files.cache, 'utf8');
     const parsed = JSON.parse(data);
     cache = new Map(Object.entries(parsed));
-    if (verboseFlag) console.log(`[cache] loaded ${cache.size} entries`);
+    if (config.flags.verbose) console.log(`[cache] loaded ${cache.size} entries`);
   } catch {
-    if (verboseFlag) console.log('[cache] no existing cache found');
+    if (config.flags.verbose) console.log('[cache] no existing cache found');
   }
 }
 
 async function saveCache() {
-  if (!cacheFlag) return;
+  if (!config.flags.cache) return;
   try {
-    await fs.mkdir(OUT_DIR, { recursive: true });
+    await fs.mkdir(config.directories.output, { recursive: true });
     const obj = Object.fromEntries(cache);
-    await fs.writeFile(CACHE_FILE, JSON.stringify(obj, null, 2), 'utf8');
-    if (verboseFlag) console.log(`[cache] saved ${cache.size} entries`);
+    await fs.writeFile(config.files.cache, JSON.stringify(obj, null, 2), 'utf8');
+    if (config.flags.verbose) console.log(`[cache] saved ${cache.size} entries`);
   } catch (e) {
     console.warn('[cache] failed to save:', e.message);
   }
 }
 
-// State management for resume
 async function loadState() {
-  if (!resumeFlag) return null;
+  if (!config.flags.resume) return null;
   try {
-    const data = await fs.readFile(STATE_FILE, 'utf8');
+    const data = await fs.readFile(config.files.state, 'utf8');
     const state = JSON.parse(data);
     console.log(`[resume] continuing from page ${state.lastPage}, ${state.items.length} items`);
     return state;
@@ -99,26 +177,28 @@ async function loadState() {
 
 async function saveState(page, items) {
   try {
-    await fs.mkdir(OUT_DIR, { recursive: true });
+    await fs.mkdir(config.directories.output, { recursive: true });
     const state = { lastPage: page, items, timestamp: Date.now() };
-    await fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), 'utf8');
+    await fs.writeFile(config.files.state, JSON.stringify(state, null, 2), 'utf8');
   } catch (e) {
     console.warn('[state] failed to save:', e.message);
   }
 }
 
-// Retry with exponential backoff
+/** ────────────────────────────────
+ *  ERROR HANDLING & RETRY
+ *  ──────────────────────────────── */
 async function withRetry(fn, maxRetries = 3, baseDelay = 1000, context = '') {
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();
     } catch (e) {
       if (i === maxRetries - 1) {
-        if (verboseFlag) console.error(`[retry] ${context} failed after ${maxRetries} attempts:`, e.message);
+        if (config.flags.verbose) console.error(`[retry] ${context} failed after ${maxRetries} attempts:`, e.message);
         throw e;
       }
       const delay = baseDelay * Math.pow(2, i);
-      if (verboseFlag) console.warn(`[retry] ${context} attempt ${i + 1} failed, retrying in ${delay}ms`);
+      if (config.flags.verbose) console.warn(`[retry] ${context} attempt ${i + 1} failed, retrying in ${delay}ms`);
       await sleep(delay);
     }
   }
@@ -175,7 +255,7 @@ async function acceptCookies(page) {
     if (btn) {
       await btn.click({ timeout: 2000 }).catch(() => {});
       cookiesAccepted = true;
-      if (verboseFlag) console.log('[cookies] accepted via direct button');
+      if (config.flags.verbose) console.log('[cookies] accepted via direct button');
       return;
     }
     const ifr = await page.$(iframeSel);
@@ -185,15 +265,17 @@ async function acceptCookies(page) {
       if (fbtn) {
         await fbtn.click({ timeout: 2000 }).catch(() => {});
         cookiesAccepted = true;
-        if (verboseFlag) console.log('[cookies] accepted via iframe');
+        if (config.flags.verbose) console.log('[cookies] accepted via iframe');
       }
     }
   } catch (e) {
-    if (verboseFlag) console.warn('[cookies] error:', e.message);
+    if (config.flags.verbose) console.warn('[cookies] error:', e.message);
   }
 }
 
-/** Parse a single ratings page (list of titles) - OPTIMIZED */
+/** ────────────────────────────────
+ *  CSFD PAGE PARSING
+ *  ──────────────────────────────── */
 async function parseListPage(page, url, tag) {
   return withRetry(async () => {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
@@ -205,65 +287,266 @@ async function parseListPage(page, url, tag) {
         timeout: 20_000,
       });
     } catch (e) {
-      if (verboseFlag) console.warn(`[parse] no content selector found on ${url}`);
+      if (config.flags.verbose) console.warn(`[parse] no content selector found on ${url}`);
       await pageDump(page, tag || "noparse");
       return [];
     }
 
     const items = await page.$$eval('#snippet--ratings table.striped tbody tr', (trs) => {
+      // Helper functions - must be inline in page context
+      const cleanTitleInline = (title) => {
+        if (!title) return '';
+        return title.trim().replace(/\s+/g, ' ').replace(/\s*\(více\)\s*$/i, '').trim();
+      };
+      
       const out = [];
       for (const tr of trs) {
         const link = tr.querySelector(".name .film-title-name");
         if (!link) continue;
 
         const url = link.getAttribute("href") || "";
-        const title = (link.textContent || "").trim().replace(/\s+/g, " ");
-
-        const infoParts = Array.from(
-          tr.querySelectorAll(".film-title-info .info")
-        ).map((s) => (s.textContent || "").trim());
+        const title = cleanTitleInline(link.textContent || "");
+        
+        const infoParts = Array.from(tr.querySelectorAll(".film-title-info .info"))
+          .map((s) => (s.textContent || "").trim());
         const infoText = infoParts.join(" ");
 
         // Year
-        let year = "";
-        const ym = infoText.match(/\b(19\d{2}|20\d{2})\b/);
-        if (ym) year = ym[1];
+        const yearMatch = infoText.match(/\b(19\d{2}|20\d{2})\b/);
+        const year = yearMatch ? yearMatch[1] : "";
 
-        // Type (normalize to English to keep data language-agnostic)
-        let type = "film";
+        // Type 
         const low = infoText.toLowerCase();
+        let type = "film";
         if (low.includes("seriál")) type = "series";
         if (low.includes("epizoda")) type = "episode";
         if (low.includes("série")) type = "season";
 
-        // Star rating (0–5) from class name like "stars stars-4"
-        let rating = "";
-        const cls = (tr.querySelector(".star-rating .stars")?.className || "");
-        const rm = cls.match(/stars-(\d)/);
-        if (rm) rating = rm[1];
+        // Rating
+        const starsEl = tr.querySelector(".star-rating .stars");
+        const className = starsEl?.className || "";
+        const ratingMatch = className.match(/stars-(\d)/);
+        const rating = ratingMatch ? ratingMatch[1] : "";
 
-        // Rating date (dd.mm.yyyy)
-        const ratingDate = (tr.querySelector(".date-only")?.textContent || "")
-          .trim();
+        // Date
+        const ratingDate = (tr.querySelector(".date-only")?.textContent || "").trim();
 
         out.push({ title, year, type, rating, ratingDate, url });
       }
       return out;
     });
 
-    if (!items.length && verboseFlag) {
+    if (!items.length && config.flags.verbose) {
       console.warn(`[parse] no items found on ${url}`);
       await pageDump(page, tag || "noparse");
     }
 
-    for (const it of items) it.url = abs(it.url);
+    // Convert relative URLs to absolute
+    for (const item of items) {
+      item.url = abs(item.url);
+    }
+    
     return items;
-  }, 2, 1500, `parsing ${url}`);
+  }, 2, config.delays.retry, `parsing ${url}`);
+}
+
+
+/** ────────────────────────────────
+ *  IMDB SEARCH & EXTRACTION
+ *  ──────────────────────────────── */
+
+/** IMDb search selectors - structured for easy maintenance */
+const imdbSelectors = {
+  // Modern IMDb layout
+  modern: {
+    container: '.ipc-metadata-list-summary-item',
+    link: 'a[href*="/title/tt"]',
+    title: '.ipc-metadata-list-summary-item__t, .titleNameText, h3',
+    year: '.ipc-metadata-list-summary-item__li, .secondaryText'
+  },
+  
+  // Legacy IMDb layout
+  legacy: {
+    container: '.findSection .findResult, .findList .findResult',
+    link: 'a[href*="/title/tt"]',
+    title: '.primaryText, .result_text a',
+    year: '.yearText, .text-muted'
+  }
+};
+
+async function searchImdbByTitle(originalTitle, year, context) {
+  if (!originalTitle || originalTitle.length < 2) return { imdb_id: "", imdb_url: "" };
+  
+  const cleanedTitle = cleanTitle(originalTitle);
+  if (!cleanedTitle) return { imdb_id: "", imdb_url: "" };
+  
+  try {
+    if (config.flags.verbose) console.log(`[imdb-search] Searching for: "${cleanedTitle}" (${year})`);
+    
+    const page = await context.newPage();
+    const searchUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(cleanedTitle)}&ref_=nv_sr_sm`;
+    
+    await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(config.delays.pageSettle);
+    
+    // Debug: Save search page
+    if (config.flags.verbose) {
+      await saveImdbSearchDebug(page);
+    }
+    
+    // Try modern selector first, then fallback to legacy
+    let result = await tryImdbSelector(page, imdbSelectors.modern) || 
+                 await tryImdbSelector(page, imdbSelectors.legacy);
+    
+    await page.close();
+    
+    if (result) {
+      if (config.flags.verbose) {
+        console.log(`[imdb-search] Found: ${result.title} (${result.year}) - ${result.imdb_id}`);
+      }
+      return { imdb_id: result.imdb_id, imdb_url: result.imdb_url };
+    }
+    
+    if (config.flags.verbose) console.log(`[imdb-search] No results found for "${cleanedTitle}"`);
+    
+  } catch (e) {
+    if (config.flags.verbose) console.warn(`[imdb-search] Failed to search: ${e.message}`);
+  }
+  
+  return { imdb_id: "", imdb_url: "" };
+}
+
+/** Try a specific IMDb selector strategy */
+async function tryImdbSelector(page, selector) {
+  try {
+    return await page.$$eval(selector.container, (results, sel) => {
+      for (const result of results.slice(0, 3)) {
+        const link = result.querySelector(sel.link);
+        const titleEl = result.querySelector(sel.title);
+        const yearEl = result.querySelector(sel.year);
+        
+        if (link) {
+          const href = link.href;
+          const title = titleEl?.textContent?.trim() || '';
+          const yearText = yearEl?.textContent || '';
+          const yearMatch = yearText.match(/\b(19\d{2}|20\d{2})\b/);
+          const foundYear = yearMatch ? yearMatch[1] : '';
+          
+          const ttMatch = href.match(/(tt\d+)/);
+          if (ttMatch) {
+            return {
+              imdb_id: ttMatch[1],
+              imdb_url: `https://www.imdb.com/title/${ttMatch[1]}/`,
+              title,
+              year: foundYear
+            };
+          }
+        }
+      }
+      return null;
+    }, selector);
+  } catch (e) {
+    if (config.flags.verbose) console.log(`[imdb-search] Selector failed: ${e.message}`);
+    return null;
+  }
+}
+
+/** Save IMDb search page for debugging */
+async function saveImdbSearchDebug(page) {
+  try {
+    await fs.mkdir(config.directories.debug, { recursive: true });
+    const html = await page.content();
+    const filename = `imdb_search_${Date.now()}.html`;
+    await fs.writeFile(`${config.directories.debug}/${filename}`, html, 'utf8');
+    if (config.flags.verbose) console.log(`[imdb-search] Search page saved to debug/`);
+  } catch (e) {
+    // Silent fail for debug saves
+  }
 }
 
 /** Extract IMDb (robust: several selectors + HTML regex fallback) */
 async function extractImdbOnPage(page) {
   try {
+    // 🔍 DEBUG: Najdi všechny odkazy a tlačítka
+    if (config.flags.verbose) {
+      const allImdbLinks = await page.$$eval('a[href*="imdb"]', (links) => {
+        return links.map(link => ({
+          href: link.href,
+          text: link.textContent?.trim(),
+          className: link.className,
+          innerHTML: link.innerHTML
+        }));
+      });
+      console.log(`[debug] Found ${allImdbLinks.length} IMDb links:`, allImdbLinks);
+
+      // Debug všechna tlačítka a externí odkazy
+      const allButtons = await page.$$eval('a, button', (elements) => {
+        return elements
+          .filter(el => {
+            const text = el.textContent?.toLowerCase() || '';
+            const classes = el.className || '';
+            const href = el.href || '';
+            return text.includes('imdb') || classes.includes('imdb') || href.includes('imdb') || classes.includes('external');
+          })
+          .map(el => ({
+            tag: el.tagName,
+            href: el.href,
+            text: el.textContent?.trim(),
+            className: el.className,
+            id: el.id,
+            innerHTML: el.innerHTML
+          }));
+      });
+      console.log(`[debug] Found ${allButtons.length} external/IMDb buttons:`, allButtons);
+    }
+
+    // 🔍 Hledej IMDb ID v skrytých datech (JSON, data atributy, JS vars) - VŽDY
+    const hiddenImdb = await page.evaluate(() => {
+      const results = [];
+      
+      // 1) Hledej v celém HTML textu
+      const htmlText = document.documentElement.outerHTML;
+      const ttMatches = htmlText.match(/\b(tt\d{6,})\b/gi) || [];
+      if (ttMatches.length) results.push({type: 'html_text', data: ttMatches});
+      
+      // 2) Hledej v data atributech
+      const dataElements = document.querySelectorAll('[data-imdb], [data-imdb-id], [data-tt]');
+      if (dataElements.length) {
+        results.push({type: 'data_attrs', data: Array.from(dataElements).map(el => ({
+          tag: el.tagName, 
+          attrs: Object.fromEntries(Array.from(el.attributes).map(a => [a.name, a.value]))
+        }))});
+      }
+      
+      // 3) Hledej v window objektu
+      if (window.filmData || window.imdbId || window.movieData) {
+        results.push({type: 'window_vars', data: {
+          filmData: window.filmData,
+          imdbId: window.imdbId, 
+          movieData: window.movieData
+        }});
+      }
+      
+      // 4) Hledej v JSON script tags
+      const scripts = document.querySelectorAll('script[type="application/ld+json"], script[type="text/json"]');
+      Array.from(scripts).forEach((script, i) => {
+        try {
+          const json = JSON.parse(script.textContent);
+          const jsonStr = JSON.stringify(json);
+          const jsonTtMatches = jsonStr.match(/\b(tt\d{6,})\b/gi) || [];
+          if (jsonTtMatches.length) {
+            results.push({type: `json_script_${i}`, data: {matches: jsonTtMatches, json}});
+          }
+        } catch {}
+      });
+      
+      return results;
+    });
+    
+    if (verboseFlag && hiddenImdb.length) {
+      console.log(`[debug] Found hidden IMDb data:`, hiddenImdb);
+    }
+
     const selectors = [
       'a.button-imdb',                     // 🆕 HLAVNÍ - přesně to co vidíš
       '.button-imdb',                      // 🆕 BACKUP
@@ -279,6 +562,7 @@ async function extractImdbOnPage(page) {
       const a = await page.$(sel);
       if (a) {
         const href = await a.getAttribute("href");
+        if (config.flags.verbose) console.log(`[debug] Found selector "${sel}" with href: ${href}`);
         if (href) {
           const full = href.startsWith("http")
             ? href
@@ -293,7 +577,29 @@ async function extractImdbOnPage(page) {
       }
     }
 
-    // 2) Search whole HTML for imdb link
+    // 2) Use hidden IMDb data if found
+    if (typeof hiddenImdb !== 'undefined' && hiddenImdb.length) {
+      for (const hidden of hiddenImdb) {
+        if (hidden.type === 'html_text' && hidden.data.length) {
+          const ttId = hidden.data[0]; // Použij první nalezené
+          if (config.flags.verbose) console.log(`[debug] Using hidden IMDb from HTML: ${ttId}`);
+          return {
+            imdb_id: ttId,
+            imdb_url: `https://www.imdb.com/title/${ttId}/`,
+          };
+        }
+        if (hidden.type.startsWith('json_script') && hidden.data.matches.length) {
+          const ttId = hidden.data.matches[0];
+          if (config.flags.verbose) console.log(`[debug] Using hidden IMDb from JSON: ${ttId}`);
+          return {
+            imdb_id: ttId,
+            imdb_url: `https://www.imdb.com/title/${ttId}/`,
+          };
+        }
+      }
+    }
+
+    // 3) Search whole HTML for imdb link  
     const html = await page.content();
     const m = html.match(
       /https?:\/\/(?:www\.)?imdb\.com\/title\/(tt\d+)/i
@@ -305,7 +611,7 @@ async function extractImdbOnPage(page) {
       };
     }
 
-    // 3) Last resort: find ttXXXXXX and construct URL
+    // 4) Last resort: find ttXXXXXX and construct URL
     const m2 = html.match(/\b(tt\d{6,})\b/i);
     if (m2) {
       return {
@@ -424,7 +730,15 @@ async function enrichWithDetails(context, items) {
           // Go to detail + cookie + small settle time
           await page.goto(it.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
           await acceptCookies(page);
-          await page.waitForTimeout(400);
+          await page.waitForTimeout(2000); // Delší čekání na JavaScript
+
+          // Zkus najít sekci s externými odkazy
+          try {
+            await page.waitForSelector('.external-links, .film-links, .film-header-links', { timeout: 3000 });
+            if (config.flags.verbose) console.log('[debug] External links section found');
+          } catch (e) {
+            if (config.flags.verbose) console.log('[debug] No external links section found');
+          }
 
           // First attempt
           let { imdb_id, imdb_url } = await extractImdbOnPage(page);
@@ -438,6 +752,17 @@ async function enrichWithDetails(context, items) {
             imdb_url = imdb_url || again.imdb_url;
             if (!original_title)
               original_title = await extractOriginalTitleOnPage(page);
+          }
+
+          // 🆕 FALLBACK: Hledej IMDb přes originální název
+          if (!imdb_id && original_title) {
+            if (config.flags.verbose) console.log(`[fallback] Searching IMDb by title: "${original_title}"`);
+            const searchResult = await searchImdbByTitle(original_title, it.year, context);
+            if (searchResult.imdb_id) {
+              imdb_id = searchResult.imdb_id;
+              imdb_url = searchResult.imdb_url;
+              if (config.flags.verbose) console.log(`[fallback] Found IMDb via search: ${imdb_id}`);
+            }
           }
 
           // For episodes/seasons/series, try parent page as a fallback
@@ -464,9 +789,21 @@ async function enrichWithDetails(context, items) {
             }
           }
 
+          // 🆕 FALLBACK pro epizody: Hledej IMDb přes originální název i zde
+          if (!imdb_id && original_title && (it.type === "episode" || it.type === "season" || it.type === "series")) {
+            if (config.flags.verbose) console.log(`[fallback-episode] Searching IMDb by title: "${original_title}"`);
+            const searchResult = await searchImdbByTitle(original_title, it.year, context);
+            if (searchResult.imdb_id) {
+              imdb_id = searchResult.imdb_id;
+              imdb_url = searchResult.imdb_url;
+              if (config.flags.verbose) console.log(`[fallback-episode] Found IMDb via search: ${imdb_id}`);
+            }
+          }
+
           it.imdb_id = imdb_id || "";
           it.imdb_url = imdb_url || "";
-          it.original_title = original_title || "";
+          // Vyčisti "(více)" z originálního názvu
+          it.original_title = (original_title || "").replace(/\s*\(více\)\s*$/i, '').trim();
 
           // Save to cache
           cache.set(cacheKey, {
@@ -479,7 +816,7 @@ async function enrichWithDetails(context, items) {
 
         await page.close();
       } catch (e) {
-        if (verboseFlag) console.warn(`[details] failed for ${it.url}:`, e.message);
+        if (config.flags.verbose) console.warn(`[details] failed for ${it.url}:`, e.message);
         it.imdb_id = it.imdb_id || "";
         it.imdb_url = it.imdb_url || "";
         it.original_title = it.original_title || "";
@@ -490,11 +827,11 @@ async function enrichWithDetails(context, items) {
         console.log(`[details] processed ${done}/${total}`);
         await saveCache(); // Periodic cache save
       }
-      await sleep(DETAIL_DELAY_MS);
+      await sleep(config.delays.detail);
     }
   }
 
-  const workers = Array.from({ length: DETAIL_CONCURRENCY }, () => worker());
+  const workers = Array.from({ length: config.concurrency.details }, () => worker());
   await Promise.all(workers);
   await saveCache(); // Final cache save
 }
@@ -502,9 +839,12 @@ async function enrichWithDetails(context, items) {
 /** ────────────────────────────────
  *  MAIN - OPTIMIZED
  *  ──────────────────────────────── */
+/** ────────────────────────────────
+ *  MAIN FUNCTION - REFACTORED
+ *  ──────────────────────────────── */
 async function main() {
   // Print usage info
-  if (argv.includes('--help')) {
+  if (hasCliFlag('help')) {
     console.log(`
 CSFD Scraper - Usage:
   node scrape_csfd.mjs [options]
@@ -529,25 +869,20 @@ Examples:
     return;
   }
 
-  console.log(`[config] MAX_PAGES=${MAX_PAGES}, MAX_ITEMS=${MAX_ITEMS || 'unlimited'}, headless=${headlessFlag}`);
-  if (testModeFlag) console.log('[config] TEST MODE enabled - faster delays');
-  if (skipDetailsFlag) console.log('[config] skipping detail enrichment');
+  // Configuration summary
+  console.log(`[config] MAX_PAGES=${config.MAX_PAGES}, MAX_ITEMS=${config.MAX_ITEMS || 'unlimited'}, headless=${config.browser.headless}`);
+  if (config.flags.test) console.log('[config] TEST MODE enabled - faster delays');
+  if (config.flags.skipDetails) console.log('[config] skipping detail enrichment');
   
   await loadCache();
   
   const browser = await chromium.launch({
-    headless: headlessFlag,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-blink-features=AutomationControlled",
-    ],
+    headless: config.browser.headless,
+    args: config.browser.args,
   });
 
   const context = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-      "(KHTML, like Gecko) Chrome/125 Safari/537.36",
+    userAgent: config.browser.userAgent,
     locale: "cs-CZ",
   });
 
@@ -566,9 +901,9 @@ Examples:
   // 2) Crawl paginated rating pages
   const seen = new Set(all.map(it => `${it.url}::${it.title}`));
 
-  for (let p = startPage; p <= MAX_PAGES; p++) {
+  for (let p = startPage; p <= config.MAX_PAGES; p++) {
     const url = pageUrl(p);
-    console.log(`[page] ${p}/${MAX_PAGES}: ${url}`);
+    console.log(`[page] ${p}/${config.MAX_PAGES}: ${url}`);
 
     let items = [];
     try {
@@ -596,44 +931,45 @@ Examples:
         added++;
         
         // Check item limit
-        if (MAX_ITEMS && all.length >= MAX_ITEMS) {
-          console.log(`→ reached max items limit (${MAX_ITEMS}), stopping`);
+        if (config.MAX_ITEMS && all.length >= config.MAX_ITEMS) {
+          console.log(`→ reached max items limit (${config.MAX_ITEMS}), stopping`);
           break;
         }
       }
     }
     
     console.log(`→ added: ${added}, total: ${all.length}`);
-    if (added === 0 || (MAX_ITEMS && all.length >= MAX_ITEMS)) break;
+    if (added === 0 || (config.MAX_ITEMS && all.length >= config.MAX_ITEMS)) break;
 
     // Save state periodically
     if (p % 5 === 0) {
       await saveState(p, all);
     }
 
-    await sleep(PAGINATION_DELAY_MS);
+    await sleep(config.delays.pagination);
   }
 
   // 3) Enrich with IMDb and original title
-  if (!skipDetailsFlag && all.length > 0) {
+  if (!config.flags.skipDetails && all.length > 0) {
     console.log(`[details] enriching ${all.length} items...`);
     await enrichWithDetails(context, all);
     console.log("[details] done.");
-  } else if (skipDetailsFlag) {
+  } else if (config.flags.skipDetails) {
     console.log("[details] skipped (--skipDetails flag)");
   }
 
   await browser.close();
 
   // 4) Save CSV + JSON
-  await fs.mkdir(OUT_DIR, { recursive: true });
-  await fs.writeFile(OUT_CSV, toCsv(all), "utf8");
-  await fs.writeFile(OUT_JSON, JSON.stringify(all, null, 2), "utf8");
+  const files = config.files;
+  await fs.mkdir(config.directories.output, { recursive: true });
+  await fs.writeFile(files.csv, toCsv(all), "utf8");
+  await fs.writeFile(files.json, JSON.stringify(all, null, 2), "utf8");
 
   // 5) Clean up state file on successful completion
-  if (!testModeFlag) {
+  if (!config.flags.test) {
     try {
-      await fs.unlink(STATE_FILE);
+      await fs.unlink(files.state);
     } catch {}
   }
 
@@ -642,15 +978,15 @@ Examples:
   const withOrig = all.filter((x) => x.original_title).length;
   console.log(`[summary] IMDb IDs: ${withImdb}/${all.length}, original titles: ${withOrig}/${all.length}`);
   console.log(`[summary] cache entries: ${cache.size}`);
-  console.log(`✓ ${all.length} rows → ${OUT_CSV} & ${OUT_JSON}`);
+  console.log(`✓ ${all.length} rows → ${files.csv} & ${files.json}`);
 }
 
 main().catch(async (e) => {
   console.error("💥 FATAL:", e.message);
-  if (verboseFlag) console.error(e.stack);
+  if (config.flags.verbose) console.error(e.stack);
   try {
-    await fs.mkdir(DEBUG_DIR, { recursive: true });
-    await fs.writeFile(`${DEBUG_DIR}/error.txt`, String(e.stack || e), "utf8");
+    await fs.mkdir(config.directories.debug, { recursive: true });
+    await fs.writeFile(`${config.directories.debug}/error.txt`, String(e.stack || e), "utf8");
   } catch {}
   process.exit(1);
 });
