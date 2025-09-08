@@ -30,14 +30,14 @@ jobs:
           npm i
           npx playwright install --with-deps chromium
 
-      # 4) Run the scraper - TESTOVACÍ MOŽNOSTI
+      # 4) Run the scraper - TESTING OPTIONS
       - name: Run scraper
-        # Výběr podle potřeby:
-        # run: node scrape_csfd.mjs --test --skipDetails              # Ultra rychlý test (~30s)
-        # run: node scrape_csfd.mjs --maxItems 10 --verbose           # Test s 10 položkami (~2min)  
-        run: node scrape_csfd.mjs --maxPages 2 --verbose            # Test 2 stránek s detaily (~5min)
-        # run: node scrape_csfd.mjs --maxPages 1                        # Současný test (1 stránka)
-        # run: node scrape_csfd.mjs --verbose                         # Produkční run (3900 hodnocení)
+        # Choose based on needs:
+        # run: node scrape_csfd.mjs --test --skipDetails              # Ultra fast test (~30s)
+        # run: node scrape_csfd.mjs --maxItems 10 --verbose           # Test with 10 items (~2min)  
+        run: node scrape_csfd.mjs --maxPages 2 --verbose            # Test 2 pages with details (~5min)
+        # run: node scrape_csfd.mjs --maxPages 1                        # Current test (1 page)
+        # run: node scrape_csfd.mjs --verbose                         # Production run (3900 ratings)
 
       # 5) Commit only if data has changed
       - name: Commit data if changed

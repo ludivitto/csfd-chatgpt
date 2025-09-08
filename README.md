@@ -18,50 +18,125 @@ Instead of browsing ČSFD manually, I can now query my dataset directly.
 
 ## 📂 Output
 
-- Data is stored in: `data/csfd_ratings.csv`
-- The file contains the following columns: `title, year, type, rating, ratingDate, url, imdb_id, imdb_url`
+- Data is stored in: `data/csfd_ratings.csv` and `data/csfd_ratings.json`
+- The file contains the following columns: `title, year, type, rating, ratingDate, url, imdb_id, imdb_url, original_title`
+- Test runs create timestamped files: `csfd_ratings_test_<timestamp>.csv`
 
 ## 🚀 How
 
 ### Workflow
 - **GitHub Actions** runs a Playwright scraper on a schedule (every Monday at 03:00 UTC) or manually.  
-- It fetches all rating pages from ČSFD, extracts the relevant fields, visits detail pages to grab IMDb IDs, and commits the results into `data/csfd_ratings.csv`.  
+- It fetches all rating pages from ČSFD, extracts the relevant fields, visits detail pages to grab IMDb IDs and original titles, and commits the results.  
+- **New:** Multiple testing modes available for faster iteration and debugging.
 - If something fails, debug screenshots/HTML are uploaded as workflow artifacts.
 
 ### Using the data
-- Open the CSV directly via the **blue badge** above.  
+- Open the CSV directly via the **blue badge** above
 - Import into **Google Sheets**:
 ```excel
 =IMPORTDATA("https://raw.githubusercontent.com/<USER>/<REPO>/main/data/csfd_ratings.csv")
 ```
 - Do not forget to have your repository setup to **Public** so Google Sheets can access the .csv
+- **New:** JSON format also available at `data/csfd_ratings.json` for easier programmatic access
 
 ## 🛠️ Technical Details
 
 - Uses **[Playwright](https://playwright.dev/)** (Chromium)
 - Runs inside **GitHub Actions** (`ubuntu-latest`)
 - Includes minor stealth tweaks (User-Agent, `--disable-blink-features=AutomationControlled`)
-- Each scraped title is enriched with its **IMDb ID** and **IMDb URL** (episodes and series fall back to their parent title)
+- Each scraped title is enriched with its **IMDb ID**, **IMDb URL**, and **original title** (episodes and series fall back to their parent title)
+- **New features:**
+  - **Caching system** - speeds up repeated runs
+  - **Resume functionality** - continue from interruption
+  - **Retry logic** with exponential backoff
+  - **Multiple testing modes** for fast iteration
+  - **Progress monitoring** with detailed logging
 - If the page fails to load, debug dumps are created:
   - `debug/screenshot_*.png`
   - `debug/page_*.html`
 - These files are automatically uploaded as **Artifacts** in the Actions tab
 
-## 📝 Notes
+## 🧪 Testing & Development
 
-- Ratings are fetched page by page (with a short delay between requests)
-- Detail pages are visited to extract IMDb IDs (with limited concurrency to avoid bans)
-- If the workflow fails due to bot protection, check the `debug` artifacts to see what the page looked like
-- You can also run the scraper locally:
+The scraper now includes multiple testing modes for fast iteration:
 
+### Quick Testing (5-30 seconds)
+```bash
+# Ultra fast test - just parsing, no details
+node scrape_csfd.mjs --test --skipDetails
+
+# Test with IMDb/original title extraction (3 items)
+node scrape_csfd.mjs --maxItems 3
+
+# Test with visible browser for debugging
+node scrape_csfd.mjs --test --headful --verbose
+```
+
+### Medium Testing (2-10 minutes)
+```bash
+# Test first page with full details
+node scrape_csfd.mjs --maxPages 1 --verbose
+
+# Test specific number of items
+node scrape_csfd.mjs --maxItems 10 --verbose
+
+# Test with resume functionality
+node scrape_csfd.mjs --maxPages 5
+# ... interrupt and resume:
+node scrape_csfd.mjs --resume
+```
+
+### Production Run (3+ hours)
+```bash
+# Full scrape with all optimizations
+node scrape_csfd.mjs --verbose
+
+# Disable cache if needed
+node scrape_csfd.mjs --no-cache
+```
+
+### Available Options
+- `--test` - Quick test mode (1 page, 5 items, faster delays)
+- `--maxPages N` - Limit to N pages
+- `--maxItems N` - Stop after N items total
+- `--skipDetails` - Skip IMDb/original title enrichment
+- `--headful` - Show browser (for debugging)
+- `--verbose` - Detailed logging
+- `--resume` - Resume from previous state
+- `--no-cache` - Disable caching
+- `--help` - Show help
+
+## 📝 Setup & Notes
+
+- Ratings are fetched page by page (with configurable delays)
+- Detail pages are visited to extract IMDb IDs and original titles (with limited concurrency)
+- **Cache system** stores results to speed up repeated runs
+- **Resume functionality** allows continuing after interruption
+- If the workflow fails due to bot protection, check the `debug` artifacts
+
+### Local Development
 ```bash
 npm install
 npx playwright install chromium
-node scrape_csfd.mjs
+
+# Quick test to verify everything works
+node scrape_csfd.mjs --test --skipDetails
+
+# Test IMDb extraction
+node scrape_csfd.mjs --maxItems 5 --verbose
 ```
+
+## ⚡ Performance & Reliability
+
+- **Testing modes**: From 5 seconds to full production run
+- **Caching**: Repeated runs are faster thanks to smart caching
+- **Resume**: Continue from where you left off after interruption
+- **Retry logic**: Handles temporary failures with exponential backoff
+- **Progress monitoring**: Real-time feedback on scraping progress
 
 ## ✅ With this setup
 
-- The green badge shows whether the workflow is passing.
-- The blue badge links directly to the latest CSV file with ČSFD ratings + IMDb enrichment.
-- And most importantly: the dataset gives ChatGPT the knowledge of what I’ve seen and how I rated it.
+- The green badge shows whether the workflow is passing
+- The blue badge links directly to the latest CSV file with ČSFD ratings + IMDb + original titles
+- **Fast testing** ensures the scraper works before committing to 3+ hour runs
+- And most importantly: the dataset gives ChatGPT the knowledge of what I've seen and how I rated it

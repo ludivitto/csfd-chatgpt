@@ -4,7 +4,7 @@
 import { chromium } from "playwright";
 import fs from "node:fs/promises";
 
-// Parse CLI flags - ROZŠÍŘENÉ
+// Parse CLI flags - EXTENDED
 const argv = process.argv.slice(2);
 
 const maxPagesFlag = (() => {
@@ -13,7 +13,7 @@ const maxPagesFlag = (() => {
   return null;
 })();
 
-// NOVÉ testovací flagy
+// NEW testing flags
 const maxItemsFlag = (() => {
   const idx = argv.indexOf("--maxItems");
   if (idx >= 0 && argv[idx + 1]) return Math.max(1, Number(argv[idx + 1]) || 1);
@@ -29,13 +29,13 @@ const cacheFlag = !argv.includes("--no-cache");
 
 
 /** ────────────────────────────────
- *  CONFIG - DYNAMICKÉ PODLE TESTŮ
+ *  CONFIG - DYNAMIC BASED ON TESTS
  *  ──────────────────────────────── */
 const BASE = "https://www.csfd.cz/uzivatel/2544-ludivitto/hodnoceni/";
 const MAX_PAGES = maxPagesFlag || (testModeFlag ? 1 : 2000);
 const MAX_ITEMS = maxItemsFlag || (testModeFlag ? 5 : null);
 
-// Rychlejší nastavení pro testy
+// Faster settings for tests
 const PAGINATION_DELAY_MS = testModeFlag ? 100 : 350;
 const DETAIL_CONCURRENCY = testModeFlag ? 2 : 4;
 const DETAIL_DELAY_MS = testModeFlag ? 50 : 250;
@@ -51,7 +51,7 @@ const STATE_FILE = `${OUT_DIR}/scraper_state.json`;
 const DEBUG_DIR = "debug";
 
 /** ────────────────────────────────
- *  HELPERS - OPTIMALIZOVANÉ
+ *  HELPERS - OPTIMIZED
  *  ──────────────────────────────── */
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const pageUrl = (n) => (n === 1 ? BASE : `${BASE}?page=${n}`);
@@ -83,7 +83,7 @@ async function saveCache() {
   }
 }
 
-// State management pro resume
+// State management for resume
 async function loadState() {
   if (!resumeFlag) return null;
   try {
@@ -107,7 +107,7 @@ async function saveState(page, items) {
   }
 }
 
-// Retry s exponential backoff
+// Retry with exponential backoff
 async function withRetry(fn, maxRetries = 3, baseDelay = 1000, context = '') {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -161,10 +161,10 @@ async function pageDump(page, tag) {
   } catch {}
 }
 
-/** Cookie consent (Didomi) if present - S CACHE */
+/** Cookie consent (Didomi) if present - WITH CACHE */
 let cookiesAccepted = false;
 async function acceptCookies(page) {
-  if (cookiesAccepted) return; // cache pro performance
+  if (cookiesAccepted) return; // cache for performance
   
   try {
     const btnSel =
@@ -193,13 +193,13 @@ async function acceptCookies(page) {
   }
 }
 
-/** Parse a single ratings page (list of titles) - OPTIMALIZOVANÁ */
+/** Parse a single ratings page (list of titles) - OPTIMIZED */
 async function parseListPage(page, url, tag) {
   return withRetry(async () => {
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
     await acceptCookies(page);
     
-    // Čekání na obsah s timeout
+    // Wait for content with timeout
     try {
       await page.waitForSelector('#snippet--ratings table.striped tbody tr', {
         timeout: 20_000,
@@ -352,7 +352,7 @@ async function extractOriginalTitleOnPage(page) {
       } catch {}
     }
 
-    // Text fallback: lines containing "Originální název:"
+    // Text fallback: lines containing "Originální název:" (original title)
     const maybe = await page.$$eval("body *", (nodes) => {
       const out = [];
       for (const n of nodes) {
@@ -384,7 +384,7 @@ function parentTitleUrl(csfdUrl) {
   return "";
 }
 
-/** Visit detail pages to enrich items with IMDb + original title - OPTIMALIZOVANÁ */
+/** Visit detail pages to enrich items with IMDb + original title - OPTIMIZED */
 async function enrichWithDetails(context, items) {
   if (items.length === 0) return;
   
@@ -495,7 +495,7 @@ async function enrichWithDetails(context, items) {
 }
 
 /** ────────────────────────────────
- *  MAIN - OPTIMALIZOVANÁ
+ *  MAIN - OPTIMIZED
  *  ──────────────────────────────── */
 async function main() {
   // Print usage info
