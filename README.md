@@ -222,45 +222,45 @@ node scrape_csfd.mjs --maxPages 2 --verbose
 
 ### 🚀 Performance Optimizations
 - **Smart Caching System**: 
-  - 📁 Cache pro IMDb data a original titles
-  - 🔄 Opakované běhy až **70% rychlejší**
-  - 💾 Periodické ukládání každých 25 položek
-  - 🧺 JSON cache formát pro rychlý přístup
+  - 📁 Cache for IMDb data and original titles
+  - 🔄 Repeated runs up to **70% faster**
+  - 💾 Periodic saves every 25 items
+  - 🧺 JSON cache format for fast access
 
 - **Worker Pool Architecture**:
-  - 👥 4 paralelní workers pro detail stránky 
+  - 👥 4 parallel workers for detail pages 
   - 🔄 Intelligent task distribution
-  - ⏱️ Adaptive delays podle režimu (50ms test, 250ms produkce)
+  - ⏱️ Adaptive delays by mode (50ms test, 250ms production)
 
 - **Adaptive Performance**:
-  - 🏎️ Rychlé nastavení pro test režimy
-  - 🐢 Konzervativní nastavení pro produkci
-  - 📈 Batch processing s optimalizovanými dávkami
+  - 🏎️ Fast settings for test modes
+  - 🐢 Conservative settings for production
+  - 📈 Batch processing with optimized batches
 
 ### 🛡️ Reliability Features
 - **Resume Functionality**: 
-  - 💾 State management - pokračování přesně tam, kde jste skončili
-  - ♾️ Automatické čištění state souborů po úspěšném dokončení
-  - 🔁 Zachování progress mezi restartováními
+  - 💾 State management - continue exactly where you left off
+  - ♾️ Automatic cleanup of state files after successful completion
+  - 🔁 Progress preservation between restarts
 
 - **Advanced Retry Logic**:
-  - 🔄 3 pokusy s exponential backoff (1s → 2s → 4s)
+  - 🔄 3 attempts with exponential backoff (1s → 2s → 4s)
   - 🎯 Context-aware error handling
-  - 🛡️ Graceful degradation při selhání jednotlivých stránek
+  - 🛡️ Graceful degradation on individual page failures
 
 - **Real-time Monitoring**:
-  - 📊 Progress tracking s detailními metrikami
-  - 🔍 Verbose logging pro debugging
+  - 📊 Progress tracking with detailed metrics
+  - 🔍 Verbose logging for debugging
   - 📈 Cache hit rate monitoring
   - ⏱️ Performance benchmarks
 
 ### 🔄 Testing Spectrum
-| 🎯 Cíl | ⏱️ Čas | 📁 Možnosti | 🔧 Použití |
+| 🎯 Goal | ⏱️ Time | 📁 Options | 🔧 Usage |
 |---------|--------|-----------|----------|
-| Quick validation | 5-30s | `--test --skipDetails` | Ověření parsing logiky |
-| Feature testing | 2-10min | `--maxItems 10-50` | Test nových features |
-| Integration testing | 10-30min | `--maxPages 2-5` | Před produkčním nasazením |
-| Full production | 3+ hod | bez omezení | Kompletní dataset update |
+| Quick validation | 5-30s | `--test --skipDetails` | Verify parsing logic |
+| Feature testing | 2-10min | `--maxItems 10-50` | Test new features |
+| Integration testing | 10-30min | `--maxPages 2-5` | Before production deployment |
+| Full production | 3+ hrs | no limits | Complete dataset update |
 
 ## ✅ Výsledek
 
