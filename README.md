@@ -262,26 +262,26 @@ node scrape_csfd.mjs --maxPages 2 --verbose
 | Integration testing | 10-30min | `--maxPages 2-5` | Before production deployment |
 | Full production | 3+ hrs | no limits | Complete dataset update |
 
-## ✅ Výsledek
+## ✅ Result
 
-### 🎯 Co tohle řešení poskytuje:
-- 🟢 **Status badge**: Zelený badge ukazuje, zda workflow funguje
-- 🔵 **Direct access**: Modrý badge vede přímo k nejnovějšímu CSV s ČSFD hodnoceními + IMDb + originální názvy  
-- ⚡ **Rychlé testování**: Ověření funkčnosti během sekund místo hodin
-- 🤖 **AI-ready dataset**: ChatGPT má přístup k tomu, co jsem viděl a jak jsem to hodnotil
+### 🎯 What this solution provides:
+- 🟢 **Status badge**: Green badge shows whether the workflow is working
+- 🔵 **Direct access**: Blue badge leads directly to the latest CSV with ČSFD ratings + IMDb + original titles  
+- ⚡ **Fast testing**: Functionality verification in seconds instead of hours
+- 🤖 **AI-ready dataset**: ChatGPT has access to what I've watched and how I rated it
 
-### 🚀 Klíčové vylepšení:
-- **70% rychlejší opakované běhy** díky smart caching systému
-- **Resume functionality** - pokračování tam, kde jste skončili
-- **Robustní error handling** s automatickými retry pokusy  
-- **Flexible testing modes** - od 30 sekund po 3+ hodin
-- **Production-ready** architektura s worker pools a monitoring
+### 🚀 Key improvements:
+- **70% faster repeated runs** thanks to smart caching system
+- **Resume functionality** - continue where you left off
+- **Robust error handling** with automatic retry attempts  
+- **Flexible testing modes** - from 30 seconds to 3+ hours
+- **Production-ready** architecture with worker pools and monitoring
 
-### 💡 Pro ChatGPT:
-Teď můžu jednoduše ptát:
-- *"Viděl jsem film X? Jak jsem ho hodnotil?"*
-- *"Ukaž mi nejlépe hodnocené sci-fi z posledních 10 let."*  
-- *"Jaké komedie jsem dal 4 hvězdičky nebo více?"*
-- *"Doporuč mi něco podobného filmu Y, který jsem hodnotil vysoko."*
+### 💡 For ChatGPT:
+Now I can simply ask:
+- *"Have I seen movie X? How did I rate it?"*
+- *"Show me my top-rated sci-fi from the last 10 years."*  
+- *"What comedies did I give 4 stars or more?"*
+- *"Recommend something similar to movie Y that I rated highly."*
 
-**A dataset je vždy aktuální díky automatickému weekly scrapingu! 🎉**
+**And the dataset is always current thanks to automatic weekly scraping! 🎉**
