@@ -502,30 +502,44 @@ async function extractCastOnPage(page) {
 /** Extrakce popisu */
 async function extractDescriptionOnPage(page) {
   try {
-    const plotEl = await page.$('.plot-preview');
-    if (plotEl) {
-      const text = (await plotEl.textContent())?.trim();
-      if (text && text.length > 10) {
-        // Preview + vyčisti distributor informace + omezeň délku
-        let cleaned = text.replace(/\s+/g, ' ')
-                         .replace(/[""]/g, '"')
-                         .replace(/\s*\([^)]+\)\s*\(více\)\s*$/, '') // Odstraň "(distributor) (více)"
-                         .replace(/\s*\(více\)\s*$/, '') // Odstraň "(více)" 
-                         .trim();
-        
-        // Omezeň na 250 znaků (cca 2-3 věty)
-        if (cleaned.length > 250) {
-          // Najdi poslední tečku před 250. znakem
-          const truncated = cleaned.substring(0, 250);
-          const lastDot = truncated.lastIndexOf('.');
-          if (lastDot > 100) { // Pokud je tečka rozumně daleko
-            cleaned = truncated.substring(0, lastDot + 1);
-          } else {
-            cleaned = truncated + '...';
+    // Zkus několik selektorů pro popis
+    const selectors = [
+      '.plot-preview',      // Hlavní selektor  
+      '.plot-full',         // Fallback - plný popis
+      '.plot-short',        // Fallback - krátký popis
+      '.content .text',     // Alternativní layout
+      '.film-description',  // Starší layout
+      '.plot',              // Obecný plot
+      '#plots .content',    // ID-based selektor
+    ];
+    
+    for (const selector of selectors) {
+      const plotEl = await page.$(selector);
+      if (plotEl) {
+        const text = (await plotEl.textContent())?.trim();
+        if (text && text.length > 10) {
+          // Preview + vyčisti distributor informace + omezeň délku
+          let cleaned = text.replace(/\s+/g, ' ')
+                           .replace(/[""]/g, '"')
+                           .replace(/\s*\([^)]+\)\s*\(více\)\s*$/, '') // Odstraň "(distributor) (více)"
+                           .replace(/\s*\(více\)\s*$/, '') // Odstraň "(více)" 
+                           .trim();
+          
+          // Omezeň na 250 znaků (cca 2-3 věty)
+          if (cleaned.length > 250) {
+            // Najdi poslední tečku před 250. znakem
+            const truncated = cleaned.substring(0, 250);
+            const lastDot = truncated.lastIndexOf('.');
+            if (lastDot > 100) { // Pokud je tečka rozumně daleko
+              cleaned = truncated.substring(0, lastDot + 1);
+            } else {
+              cleaned = truncated + '...';
+            }
           }
+          
+          if (config.flags.verbose) console.log(`[description] Found using selector: ${selector}`);
+          return cleaned;
         }
-        
-        return cleaned;
       }
     }
   } catch {}
