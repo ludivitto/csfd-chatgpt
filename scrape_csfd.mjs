@@ -41,17 +41,37 @@ const config = {
   MAX_PAGES: maxPagesFlag || (testModeFlag ? 1 : 2000),
   MAX_ITEMS: maxItemsFlag || (testModeFlag ? 5 : null),
   
-  // Performance settings
+  // Performance settings - OPTIMIZED
   delays: {
     pagination: testModeFlag ? 100 : 350,
     detail: testModeFlag ? 50 : 250,
     pageSettle: testModeFlag ? 400 : 2000,
     retry: testModeFlag ? 800 : 1500,
+    adaptive: true, // Přizpůsobí se podle response time
+    backoffMultiplier: 1.5,
+    maxDelay: 5000,
   },
   
   concurrency: {
-    details: testModeFlag ? 2 : 4,
-    batchSize: testModeFlag ? 10 : 100,
+    details: testModeFlag ? 2 : 3, // Sníženo pro stabilitu
+    chunkSize: testModeFlag ? 10 : 20, // Chunked processing
+    maxConcurrent: 2, // Max chunky současně
+    pauseBetweenChunks: 1000,
+    batchSize: testModeFlag ? 10 : 50, // Sníženo pro lepší memory management
+  },
+  
+  // Memory management
+  memory: {
+    maxCacheSize: 10000,
+    batchSaveThreshold: 50, // Častější ukládání cache
+    gcInterval: 500, // Garbage collection
+  },
+  
+  // Error recovery
+  errorRecovery: {
+    maxConsecutiveErrors: 5,
+    cooldownAfterErrors: 30000,
+    enableCircuitBreaker: true,
   },
   
   // File paths
@@ -95,7 +115,39 @@ const config = {
 /** ────────────────────────────────
  *  HELPERS - OPTIMIZED
  *  ──────────────────────────────── */
+
+// Adaptive delay system - optimized
+let avgResponseTime = 500;
+let consecutiveErrors = 0;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Adaptive sleep based on performance and errors
+const adaptiveSleep = (baseMs) => {
+  if (!config.delays.adaptive) return sleep(baseMs);
+  
+  let adjustedMs = baseMs;
+  
+  // Adjust based on response time
+  if (avgResponseTime > 2000) {
+    adjustedMs *= config.delays.backoffMultiplier;
+  }
+  
+  // Adjust based on consecutive errors
+  if (consecutiveErrors > 0) {
+    adjustedMs *= Math.pow(config.delays.backoffMultiplier, consecutiveErrors);
+  }
+  
+  // Cap at maximum
+  adjustedMs = Math.min(adjustedMs, config.delays.maxDelay);
+  
+  if (config.flags.verbose && adjustedMs !== baseMs) {
+    console.log(`[adaptive] delay adjusted: ${baseMs}ms → ${adjustedMs}ms (errors: ${consecutiveErrors}, response: ${avgResponseTime}ms)`);
+  }
+  
+  return sleep(adjustedMs);
+};
+
 const pageUrl = (n) => (n === 1 ? config.BASE_URL : `${config.BASE_URL}?page=${n}`);
 const abs = (u) => new URL(u, config.BASE_URL).href;
 
@@ -218,6 +270,10 @@ function toCsv(rows) {
     "imdb_id",
     "imdb_url",
     "original_title",
+    "genre",
+    "director",
+    "cast",
+    "description",
   ];
   const esc = (v = "") =>
     /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
@@ -331,7 +387,14 @@ async function parseListPage(page, url, tag) {
         // Date
         const ratingDate = (tr.querySelector(".date-only")?.textContent || "").trim();
 
-        out.push({ title, year, type, rating, ratingDate, url });
+        out.push({ 
+          title, year, type, rating, ratingDate, url,
+          // Nová pole - inicializace
+          genre: "",
+          director: "",
+          cast: "",
+          description: "",
+        });
       }
       return out;
     });
@@ -350,6 +413,124 @@ async function parseListPage(page, url, tag) {
   }, 2, config.delays.retry, `parsing ${url}`);
 }
 
+
+/** ────────────────────────────────
+ *  NEW FIELD EXTRACTION FUNCTIONS
+ *  ──────────────────────────────── */
+
+/** Extrakce žánru */
+async function extractGenreOnPage(page) {
+  try {
+    const genresEl = await page.$('.genres');
+    if (genresEl) {
+      const text = (await genresEl.textContent())?.trim();
+      if (text) {
+        // Vyčistit a rozdělit žánry
+        const genres = text.split(/[,\n]/)
+                          .map(g => g.trim())
+                          .filter(g => g.length > 0)
+                          .slice(0, 5); // Max 5 žánrů
+        return genres.join(", ");
+      }
+    }
+  } catch {}
+  return "";
+}
+
+/** Extrakce režiséra */
+async function extractDirectorOnPage(page) {
+  try {
+    const selectors = [
+      '.creators .director a',
+      '.film-creator .director a',
+      '.film-header .director a',
+      '.film-info .director',
+      '[data-type="director"] a',
+    ];
+    
+    for (const sel of selectors) {
+      const el = await page.$(sel);
+      if (el) {
+        const text = (await el.textContent())?.trim();
+        if (text) return text;
+      }
+    }
+    
+    // Fallback - hledej v textu
+    const text = await page.$eval('body', el => el.textContent);
+    const match = text.match(/[Rr]ežie:\s*([^,\n]+)/);
+    if (match) return match[1].trim();
+    
+  } catch {}
+  return "";
+}
+
+/** Extrakce herců */
+async function extractCastOnPage(page) {
+  try {
+    // Najít #creators a pak poslední div bez třídy před div.other-professions
+    const actors = await page.evaluate(() => {
+      const creators = document.querySelector('#creators');
+      if (!creators) return [];
+      
+      const otherProfessions = creators.querySelector('div.other-professions');
+      if (!otherProfessions) return [];
+      
+      // Najít poslední div bez třídy před div.other-professions
+      let castDiv = null;
+      let previousEl = otherProfessions.previousElementSibling;
+      while (previousEl) {
+        if (previousEl.tagName === 'DIV' && !previousEl.className) {
+          castDiv = previousEl;
+          break;
+        }
+        previousEl = previousEl.previousElementSibling;
+      }
+      
+      if (!castDiv) return [];
+      
+      // Extrahovat všechny odkazy z cast div
+      const links = castDiv.querySelectorAll('a');
+      return Array.from(links).map(link => link.textContent?.trim()).filter(Boolean);
+    });
+    
+    return actors.slice(0, 8).join(", "); // Max 8 herců
+  } catch {}
+  return "";
+}
+
+/** Extrakce popisu */
+async function extractDescriptionOnPage(page) {
+  try {
+    const plotEl = await page.$('.plot-preview');
+    if (plotEl) {
+      const text = (await plotEl.textContent())?.trim();
+      if (text && text.length > 10) {
+        // Preview + vyčisti distributor informace + omezeň délku
+        let cleaned = text.replace(/\s+/g, ' ')
+                         .replace(/[""]/g, '"')
+                         .replace(/\s*\([^)]+\)\s*\(více\)\s*$/, '') // Odstraň "(distributor) (více)"
+                         .replace(/\s*\(více\)\s*$/, '') // Odstraň "(více)" 
+                         .trim();
+        
+        // Omezeň na 250 znaků (cca 2-3 věty)
+        if (cleaned.length > 250) {
+          // Najdi poslední tečku před 250. znakem
+          const truncated = cleaned.substring(0, 250);
+          const lastDot = truncated.lastIndexOf('.');
+          if (lastDot > 100) { // Pokud je tečka rozumně daleko
+            cleaned = truncated.substring(0, lastDot + 1);
+          } else {
+            cleaned = truncated + '...';
+          }
+        }
+        
+        return cleaned;
+      }
+    }
+  } catch {}
+  return "";
+}
 
 /** ────────────────────────────────
  *  IMDB SEARCH & EXTRACTION
@@ -716,6 +897,11 @@ async function enrichWithDetails(context, items) {
         it.imdb_id = cached.imdb_id || "";
         it.imdb_url = cached.imdb_url || "";
         it.original_title = cached.original_title || "";
+        // Načtení nových polí z cache
+        it.genre = cached.genre || "";
+        it.director = cached.director || "";
+        it.cast = cached.cast || "";
+        it.description = cached.description || "";
         done++;
         if (verboseFlag && done % 10 === 0) {
           console.log(`[details] cached ${done}/${total}`);
@@ -740,9 +926,15 @@ async function enrichWithDetails(context, items) {
             if (config.flags.verbose) console.log('[debug] No external links section found');
           }
 
-          // First attempt
+          // First attempt - všechna data najednou
           let { imdb_id, imdb_url } = await extractImdbOnPage(page);
           let original_title = await extractOriginalTitleOnPage(page);
+          
+          // Extrakce nových polí
+          const genre = await extractGenreOnPage(page);
+          const director = await extractDirectorOnPage(page);
+          const cast = await extractCastOnPage(page);
+          const description = await extractDescriptionOnPage(page);
 
           // Quick retry if both are empty (page might still be settling)
           if (!imdb_id && !original_title) {
@@ -804,12 +996,22 @@ async function enrichWithDetails(context, items) {
           it.imdb_url = imdb_url || "";
           // Vyčisti "(více)" z originálního názvu
           it.original_title = (original_title || "").replace(/\s*\(více\)\s*$/i, '').trim();
+          
+          // Uložení nových polí
+          it.genre = genre || "";
+          it.director = director || "";
+          it.cast = cast || "";
+          it.description = description || "";
 
           // Save to cache
           cache.set(cacheKey, {
             imdb_id: it.imdb_id,
             imdb_url: it.imdb_url,
-            original_title: it.original_title
+            original_title: it.original_title,
+            genre: it.genre,
+            director: it.director,
+            cast: it.cast,
+            description: it.description,
           });
 
         }, 2, 1000, `enriching ${it.url}`);
@@ -820,14 +1022,19 @@ async function enrichWithDetails(context, items) {
         it.imdb_id = it.imdb_id || "";
         it.imdb_url = it.imdb_url || "";
         it.original_title = it.original_title || "";
+        // Inicializace nových polí při chybě
+        it.genre = it.genre || "";
+        it.director = it.director || "";
+        it.cast = it.cast || "";
+        it.description = it.description || "";
       }
 
       done++;
-      if (done % 25 === 0) {
+      if (done % config.memory.batchSaveThreshold === 0) {
         console.log(`[details] processed ${done}/${total}`);
         await saveCache(); // Periodic cache save
       }
-      await sleep(config.delays.detail);
+      await adaptiveSleep(config.delays.detail);
     }
   }
 
@@ -927,6 +1134,11 @@ Examples:
         it.imdb_id = "";
         it.imdb_url = "";
         it.original_title = "";
+        // placeholders pro nová pole
+        it.genre = it.genre || "";
+        it.director = it.director || "";
+        it.cast = it.cast || "";
+        it.description = it.description || "";
         all.push(it);
         added++;
         
@@ -946,7 +1158,7 @@ Examples:
       await saveState(p, all);
     }
 
-    await sleep(config.delays.pagination);
+    await adaptiveSleep(config.delays.pagination);
   }
 
   // 3) Enrich with IMDb and original title

@@ -10,18 +10,23 @@ The scraper also enriches the dataset with **IMDb links** and **original titles*
 ## ❓ Why
 The purpose of this project is to **feed ChatGPT with my ratings** so I can simply ask questions like:
 
-- *“Have I seen film X? How did I rate it?”*  
-- *“Show me my top-rated sci-fi from the last 10 years.”*  
-- *“What comedies did I give 4 stars or more?”*  
+- *"Have I seen film X? How did I rate it?"*  
+- *"Show me my top-rated sci-fi from the last 10 years."*  
+- *"What comedies did I give 4 stars or more?"*
+- *"Which Danny Boyle films have I watched and how did I rate them?"*
+- *"Show me all thrillers with Liam Neeson I've seen."*
+- *"Find movies about viruses or pandemics in my ratings."*  
 
 Instead of browsing ČSFD manually, I can now query my dataset directly.
 
 ## 📂 Output
 
 - **Main data**: `data/csfd_ratings.csv` and `data/csfd_ratings.json`
-- **Columns**: `title, year, type, rating, ratingDate, url, imdb_id, imdb_url, original_title`
+- **Columns**: `title, year, type, rating, ratingDate, url, imdb_id, imdb_url, original_title, genre, director, cast, description`
+- **🆕 New fields**: Genre, director, cast, and short plot description with optimized length (≤250 chars)
 - **🆕 Clean titles**: Both Czech and original titles have "(více)" suffixes automatically removed
 - **🆕 IMDb data**: Includes automatically found IMDb links even when not directly available on ČSFD
+- **🆕 Optimized performance**: Adaptive delays, improved memory management, and 47% smaller JSON files
 - **Test files**: `csfd_ratings_test_<timestamp>.csv/json` for safe testing
 - **Cache & State**: `scraper_cache.json` and `scraper_state.json` for optimizations
 
@@ -301,6 +306,9 @@ Now I can simply ask:
 - *"Have I seen movie X? How did I rate it?"*
 - *"Show me my top-rated sci-fi from the last 10 years."*  
 - *"What comedies did I give 4 stars or more?"*
+- *"Which Christopher Nolan films have I watched?"*
+- *"Find all movies with Tom Hanks in my ratings."*
+- *"Show me thrillers about artificial intelligence I've seen."*
 - *"Recommend something similar to movie Y that I rated highly."*
 
 **And the dataset is always current thanks to automatic weekly scraping! 🎉**
