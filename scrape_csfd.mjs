@@ -589,9 +589,14 @@ async function searchImdbByTitle(originalTitle, year, context) {
       await saveImdbSearchDebug(page);
     }
     
-    // Try modern selector first, then fallback to legacy
-    let result = await tryImdbSelector(page, imdbSelectors.modern) || 
-                 await tryImdbSelector(page, imdbSelectors.legacy);
+    // 🆕 NOVÝ PŘÍSTUP: Čti data z __NEXT_DATA__ JSON
+    let result = await tryImdbJsonData(page, cleanedTitle, year);
+    
+    // Fallback: Try modern selector first, then fallback to legacy
+    if (!result) {
+      result = await tryImdbSelector(page, imdbSelectors.modern) || 
+               await tryImdbSelector(page, imdbSelectors.legacy);
+    }
     
     await page.close();
     
@@ -609,6 +614,77 @@ async function searchImdbByTitle(originalTitle, year, context) {
   }
   
   return { imdb_id: "", imdb_url: "" };
+}
+
+/** 🆕 NOVÁ FUNKCE: Čti IMDb data z __NEXT_DATA__ JSON */
+async function tryImdbJsonData(page, searchTitle, targetYear) {
+  try {
+    const result = await page.evaluate(({ title, year }) => {
+      // Najdi __NEXT_DATA__ script tag
+      const script = document.querySelector('script#__NEXT_DATA__');
+      if (!script) return null;
+      
+      try {
+        const data = JSON.parse(script.textContent);
+        
+        // Projdi titleResults v JSON data
+        const titleResults = data?.props?.pageProps?.titleResults?.results || [];
+        
+        for (const item of titleResults.slice(0, 5)) { // Zkontroluj prvních 5 výsledků
+          const itemTitle = item.titleText?.text || item.titleText || '';
+          const itemYear = item.releaseYear?.year || item.releaseYear || '';
+          const imdbId = item.id || '';
+          
+          // Kontrola shody názvu (case insensitive, partial match)
+          const titleMatch = itemTitle.toLowerCase().includes(title.toLowerCase()) ||
+                           title.toLowerCase().includes(itemTitle.toLowerCase());
+          
+          // Kontrola roku (pokud je specifikován)
+          const yearMatch = !year || !itemYear || itemYear.toString() === year.toString();
+          
+          if (titleMatch && yearMatch && imdbId && imdbId.startsWith('tt')) {
+            return {
+              imdb_id: imdbId,
+              imdb_url: `https://www.imdb.com/title/${imdbId}/`,
+              title: itemTitle,
+              year: itemYear.toString()
+            };
+          }
+        }
+        
+        // Pokud nenajde přesný match, zkus první výsledek s podobným názvem
+        for (const item of titleResults.slice(0, 3)) {
+          const itemTitle = item.titleText?.text || item.titleText || '';
+          const imdbId = item.id || '';
+          
+          if (imdbId && imdbId.startsWith('tt') && 
+              (itemTitle.toLowerCase().includes(title.toLowerCase()) || 
+               title.toLowerCase().includes(itemTitle.toLowerCase()))) {
+            return {
+              imdb_id: imdbId,
+              imdb_url: `https://www.imdb.com/title/${imdbId}/`,
+              title: itemTitle,
+              year: (item.releaseYear?.year || '').toString()
+            };
+          }
+        }
+        
+      } catch (e) {
+        console.warn('Failed to parse __NEXT_DATA__ JSON:', e);
+      }
+      
+      return null;
+    }, { title: searchTitle, year: targetYear });
+    
+    if (result && config.flags.verbose) {
+      console.log(`[imdb-json] Found via JSON: ${result.title} (${result.year}) - ${result.imdb_id}`);
+    }
+    
+    return result;
+  } catch (e) {
+    if (config.flags.verbose) console.log(`[imdb-json] JSON parsing failed: ${e.message}`);
+    return null;
+  }
 }
 
 /** Try a specific IMDb selector strategy */
