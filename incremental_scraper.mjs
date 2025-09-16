@@ -188,6 +188,66 @@ async function parseListPage(page, url) {
 }
 
 /** ────────────────────────────────
+ *  IMDB EXTRACTION (z hlavního scraperu)
+ *  ──────────────────────────────── */
+
+/** Extract IMDb (robust: several selectors + HTML regex fallback) */
+async function extractImdbOnPage(page) {
+  try {
+    const selectors = [
+      'a.button-imdb',                     // 🆕 HLAVNÍ - přesně to co vidíš
+      '.button-imdb',                      // 🆕 BACKUP
+      'a.button.button-imdb',              // 🆕 ÚPLNÝ selektor
+      'a[href*="imdb.com/title/tt"]',      // ✅ FUNGUJE
+      'a[href*="imdb.com/title/"]',        // ✅ FUNGUJE  
+      'a[href*="://www.imdb.com/title/"]', // ✅ FUNGUJE
+      'a.imdb',                            // 🗑️ STARÝ
+      '.imdb a',                           // 🗑️ STARÝ
+      'a[href*="imdb"]',                   // ✅ OBECNÝ
+    ];
+    for (const sel of selectors) {
+      const a = await page.$(sel);
+      if (a) {
+        const href = await a.getAttribute("href");
+        if (href) {
+          const full = href.startsWith("http")
+            ? href
+            : new URL(href, page.url()).href;
+          const m = full.match(/(tt\d+)/i);
+          if (m)
+            return {
+              imdb_id: m[1],
+              imdb_url: `https://www.imdb.com/title/${m[1]}/`,
+            };
+        }
+      }
+    }
+
+    // Search whole HTML for imdb link  
+    const html = await page.content();
+    const m = html.match(
+      /https?:\/\/(?:www\.)?imdb\.com\/title\/(tt\d+)/i
+    );
+    if (m) {
+      return {
+        imdb_id: m[1],
+        imdb_url: `https://www.imdb.com/title/${m[1]}/`,
+      };
+    }
+
+    // Last resort: find ttXXXXXX and construct URL
+    const m2 = html.match(/\b(tt\d{6,})\b/i);
+    if (m2) {
+      return {
+        imdb_id: m2[1],
+        imdb_url: `https://www.imdb.com/title/${m2[1]}/`,
+      };
+    }
+  } catch {}
+  return { imdb_id: "", imdb_url: "" };
+}
+
+/** ────────────────────────────────
  *  ENRICHMENT (zjednodušené z hlavního scraperu)
  *  ──────────────────────────────── */
 async function enrichNewItems(context, items) {
@@ -231,15 +291,11 @@ async function enrichNewItems(context, items) {
 // Zjednodušená extrakce základních detailů
 async function extractBasicDetails(page, item) {
   try {
-    // IMDb
-    const imdbLink = await page.$('a.button-imdb, a[href*="imdb.com/title/tt"]');
-    if (imdbLink) {
-      const href = await imdbLink.getAttribute('href');
-      const match = href?.match(/(tt\d+)/);
-      if (match) {
-        item.imdb_id = match[1];
-        item.imdb_url = `https://www.imdb.com/title/${match[1]}/`;
-      }
+    // IMDb - rozšířená extrakce
+    const imdbData = await extractImdbOnPage(page);
+    if (imdbData.imdb_id) {
+      item.imdb_id = imdbData.imdb_id;
+      item.imdb_url = imdbData.imdb_url;
     }
     
     // Originální název
@@ -322,12 +378,35 @@ async function extractBasicDetails(page, item) {
       }
     } catch {}
     
-    // Popis (zjednodušený)
+    // Popis (s čištěním distributor informací)
     const plotEl = await page.$('.plot-preview, .plot-full');
     if (plotEl) {
       const text = await plotEl.textContent();
       if (text && text.length > 10) {
-        item.description = text.trim().substring(0, 200) + (text.length > 200 ? '...' : '');
+        // Vyčisti distributor informace a omezeň délku
+        let cleaned = text.replace(/\s+/g, ' ')
+                         .replace(/[""]/g, '"')
+                         .replace(/\s*\([^)]*Netflix[^)]*\)\s*/g, '') // Odstraň (Netflix)
+                         .replace(/\s*\([^)]*HBO[^)]*\)\s*/g, '') // Odstraň (HBO)
+                         .replace(/\s*\([^)]*Disney[^)]*\)\s*/g, '') // Odstraň (Disney)
+                         .replace(/\s*\([^)]*Amazon[^)]*\)\s*/g, '') // Odstraň (Amazon)
+                         .replace(/\s*\([^)]*Apple[^)]*\)\s*/g, '') // Odstraň (Apple)
+                         .replace(/\s*\([^)]+\)\s*\(více\)\s*$/, '') // Odstraň "(distributor) (více)"
+                         .replace(/\s*\(více\)\s*$/, '') // Odstraň "(více)" 
+                         .trim();
+        
+        // Omezeň na 200 znaků
+        if (cleaned.length > 200) {
+          const truncated = cleaned.substring(0, 200);
+          const lastDot = truncated.lastIndexOf('.');
+          if (lastDot > 100) {
+            cleaned = truncated.substring(0, lastDot + 1);
+          } else {
+            cleaned = truncated + '...';
+          }
+        }
+        
+        item.description = cleaned;
       }
     }
     
