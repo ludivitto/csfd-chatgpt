@@ -1,0 +1,184 @@
+name: Denní CSFD Update
+
+on:
+  # Každý den v 2:00 UTC (3:00 CET) - rychlá kontrola nových položek
+  schedule:
+    - cron: "0 2 * * *"
+  
+  # Manuální spuštění
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Režim spuštění'
+        required: true
+        default: 'incremental'
+        type: choice
+        options:
+        - 'incremental'     # Rychlá kontrola nových položek (~2-5 min)
+        - 'full-check'      # Kontrola více stránek (~10-15 min)
+        - 'force-full'      # Vynutit plný scraper (3+ hodiny)
+        - 'test'            # Test režim (~1 min)
+      verbose:
+        description: 'Detailní logování'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  daily-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1) Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2) Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3) Install dependencies
+      - name: Install dependencies
+        run: |
+          npm i
+          npx playwright install --with-deps chromium
+
+      # 4) Spuštění podle režimu
+      - name: Run daily scraper
+        run: |
+          VERBOSE_FLAG=""
+          if [ "${{ github.event.inputs.verbose }}" = "true" ]; then
+            VERBOSE_FLAG="--verbose"
+          fi
+          
+          case "${{ github.event.inputs.mode || 'incremental' }}" in
+            "incremental")
+              echo "🚀 Denní inkrementální update - kontrola nových položek"
+              node incremental_scraper.mjs
+              ;;
+            "full-check")
+              echo "🔍 Rozšířená kontrola - více stránek"
+              # Upravíme konfiguraci pro více stránek
+              node -e "
+                const fs = require('fs');
+                let content = fs.readFileSync('incremental_scraper.mjs', 'utf8');
+                content = content.replace('maxPagesToCheck: 5', 'maxPagesToCheck: 10');
+                content = content.replace('maxNewItems: 50', 'maxNewItems: 100');
+                fs.writeFileSync('incremental_scraper_temp.mjs', content);
+              "
+              node incremental_scraper_temp.mjs
+              rm incremental_scraper_temp.mjs
+              ;;
+            "force-full")
+              echo "🏭 Vynucení plného scraperu - 3+ hodiny"
+              node scrape_csfd.mjs --verbose
+              ;;
+            "test")
+              echo "🧪 Test režim - rychlý test"
+              node test_incremental.mjs
+              ;;
+            *)
+              echo "❌ Neznámý režim: ${{ github.event.inputs.mode }}"
+              exit 1
+              ;;
+          esac
+
+      # 5) Komprese dat (pouze pokud byly změny)
+      - name: Compress data if changed
+        if: success()
+        run: |
+          if [ -f "data/new_items.json" ] && [ -s "data/new_items.json" ]; then
+            echo "🗜️ Komprimuji aktualizovaná data..."
+            node build_compress.mjs
+            echo "✅ Komprese dokončena"
+          else
+            echo "ℹ️ Žádné nové položky - komprese přeskočena"
+          fi
+
+      # 6) Commit změn
+      - name: Commit changes
+        if: success()
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Přidání všech změněných souborů
+          git add data/ || true
+          
+          # Kontrola, zda jsou nějaké změny
+          if ! git diff --cached --quiet; then
+            # Získání informací o nových položkách
+            NEW_ITEMS_COUNT=0
+            if [ -f "data/new_items.json" ]; then
+              NEW_ITEMS_COUNT=$(node -e "try { console.log(JSON.parse(require('fs').readFileSync('data/new_items.json', 'utf8')).length); } catch { console.log(0); }")
+            fi
+            
+            if [ "$NEW_ITEMS_COUNT" -gt 0 ]; then
+              git commit -m "🆕 Denní update: Přidáno $NEW_ITEMS_COUNT nových položek [skip ci]"
+            else
+              git commit -m "🔄 Denní update: Žádné nové položky [skip ci]"
+            fi
+            
+            git push
+            echo "✅ Změny commitnuty a pushnuty"
+          else
+            echo "ℹ️ Žádné změny k commitnutí"
+          fi
+
+      # 7) Aktualizace schedule podle aktivity
+      - name: Update smart schedule
+        if: success()
+        run: |
+          echo "🔄 Aktualizuji schedule podle aktivity..."
+          node smart_scheduler.mjs --update || echo "Schedule update failed, continuing..."
+
+      # 8) Upload debug artifacts
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-debug-${{ github.run_number }}
+          path: |
+            data/new_items.json
+            data/incremental_state.json
+            data/schedule_config.json
+            data/*_backup_*.json
+          retention-days: 7
+
+      # 9) Summary
+      - name: Daily Update Summary
+        if: always()
+        run: |
+          echo "## 📊 Denní CSFD Update - Výsledek" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "data/incremental_state.json" ]; then
+            NEW_ITEMS=$(node -e "try { const state = JSON.parse(require('fs').readFileSync('data/incremental_state.json', 'utf8')); console.log(state.newItemsFound || 0); } catch { console.log(0); }")
+            TOTAL_ITEMS=$(node -e "try { const state = JSON.parse(require('fs').readFileSync('data/incremental_state.json', 'utf8')); console.log(state.totalItems || 0); } catch { console.log(0); }")
+            PAGES_CHECKED=$(node -e "try { const state = JSON.parse(require('fs').readFileSync('data/incremental_state.json', 'utf8')); console.log(state.pagesChecked || 0); } catch { console.log(0); }")
+            
+            echo "- **Nové položky:** $NEW_ITEMS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Celkem položek:** $TOTAL_ITEMS" >> $GITHUB_STEP_SUMMARY
+            echo "- **Zkontrolované stránky:** $PAGES_CHECKED" >> $GITHUB_STEP_SUMMARY
+            echo "- **Čas běhu:** $(date)" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$NEW_ITEMS" -gt 0 ]; then
+              echo "- **Status:** ✅ Nalezeny nové položky" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- **Status:** ℹ️ Žádné nové položky" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- **Stav:** ❌ Chyba při načítání stavu" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📁 Soubory" >> $GITHUB_STEP_SUMMARY
+          echo "- \`data/csfd_ratings.json\` - Hlavní dataset" >> $GITHUB_STEP_SUMMARY
+          echo "- \`data/new_items.json\` - Nové položky z tohoto běhu" >> $GITHUB_STEP_SUMMARY
+          echo "- \`data/incremental_state.json\` - Stav posledního běhu" >> $GITHUB_STEP_SUMMARY
+          echo "- \`data/schedule_config.json\` - Aktuální schedule konfigurace" >> $GITHUB_STEP_SUMMARY

@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "scrape": "node scrape_csfd.mjs",
+    "scrape-inc": "node incremental_scraper.mjs",
+    "manage": "node manage_scraper.mjs",
+    "schedule": "node smart_scheduler.mjs",
     "postinstall": "npx playwright install chromium"
   },
   "dependencies": {
