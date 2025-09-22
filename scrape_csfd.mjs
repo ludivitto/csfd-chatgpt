@@ -578,27 +578,20 @@ async function searchImdbByTitle(originalTitle, year, context) {
   try {
     if (config.flags.verbose) console.log(`[imdb-search] Searching for: "${cleanedTitle}" (${year})`);
     
-    const page = await context.newPage();
-    const searchUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(cleanedTitle)}&ref_=nv_sr_sm`;
+    // 🆕 NOVÝ: Zkus nejdříve originální název
+    let result = await performImdbSearch(cleanedTitle, year, context);
     
-    await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await page.waitForTimeout(config.delays.pageSettle);
-    
-    // Debug: Save search page
-    if (config.flags.verbose) {
-      await saveImdbSearchDebug(page);
+    // 🆕 FALLBACK: Pokud je to japonský název a neúspěšné, zkus anglické varianty
+    if (!result && isJapaneseTitle(cleanedTitle)) {
+      if (config.flags.verbose) console.log(`[imdb-search] Japanese title detected, trying English variants`);
+      
+      const englishVariants = generateEnglishVariants(cleanedTitle);
+      for (const variant of englishVariants) {
+        if (config.flags.verbose) console.log(`[imdb-search] Trying English variant: "${variant}"`);
+        result = await performImdbSearch(variant, year, context);
+        if (result) break;
+      }
     }
-    
-    // 🆕 NOVÝ PŘÍSTUP: Čti data z __NEXT_DATA__ JSON
-    let result = await tryImdbJsonData(page, cleanedTitle, year);
-    
-    // Fallback: Try modern selector first, then fallback to legacy
-    if (!result) {
-      result = await tryImdbSelector(page, imdbSelectors.modern) || 
-               await tryImdbSelector(page, imdbSelectors.legacy);
-    }
-    
-    await page.close();
     
     if (result) {
       if (config.flags.verbose) {
@@ -614,6 +607,82 @@ async function searchImdbByTitle(originalTitle, year, context) {
   }
   
   return { imdb_id: "", imdb_url: "" };
+}
+
+/** 🆕 NOVÁ FUNKCE: Provede skutečné IMDB vyhledávání */
+async function performImdbSearch(searchTitle, year, context) {
+  const page = await context.newPage();
+  
+  try {
+    const searchUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(searchTitle)}&ref_=nv_sr_sm`;
+    
+    await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(config.delays.pageSettle);
+    
+    // Debug: Save search page
+    if (config.flags.verbose) {
+      await saveImdbSearchDebug(page);
+    }
+    
+    // 🆕 NOVÝ PŘÍSTUP: Čti data z __NEXT_DATA__ JSON
+    let result = await tryImdbJsonData(page, searchTitle, year);
+    
+    // Fallback: Try modern selector first, then fallback to legacy
+    if (!result) {
+      result = await tryImdbSelector(page, imdbSelectors.modern) || 
+               await tryImdbSelector(page, imdbSelectors.legacy);
+    }
+    
+    return result;
+  } finally {
+    await page.close();
+  }
+}
+
+/** 🆕 NOVÁ FUNKCE: Detekuje japonské názvy */
+function isJapaneseTitle(title) {
+  // Detekuj japonské znaky (hiragana, katakana, kanji)
+  const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/;
+  return japaneseRegex.test(title);
+}
+
+/** 🆕 NOVÁ FUNKCE: Generuje anglické varianty pro japonské názvy */
+function generateEnglishVariants(japaneseTitle) {
+  const variants = [];
+  
+  // Specifické mapování pro známé anime/filmy
+  const titleMappings = {
+    'Gekijouban Kimetsu no Yaiba: Mugen-jou Hen Part 1': [
+      'Demon Slayer: Kimetsu no Yaiba Infinity Castle',
+      'Demon Slayer: Kimetsu no Yaiba Infinity Castle Part 1',
+      'Kimetsu no Yaiba Infinity Castle',
+      'Demon Slayer Infinity Castle'
+    ],
+    'Kimetsu no Yaiba': [
+      'Demon Slayer',
+      'Demon Slayer: Kimetsu no Yaiba'
+    ]
+  };
+  
+  // Zkus specifické mapování
+  for (const [japanese, englishList] of Object.entries(titleMappings)) {
+    if (japaneseTitle.includes(japanese) || japanese.includes(japaneseTitle)) {
+      variants.push(...englishList);
+    }
+  }
+  
+  // Obecné transformace
+  if (japaneseTitle.includes('Kimetsu no Yaiba')) {
+    variants.push('Demon Slayer');
+    variants.push('Demon Slayer: Kimetsu no Yaiba');
+  }
+  
+  if (japaneseTitle.includes('Gekijouban')) {
+    variants.push(japaneseTitle.replace('Gekijouban', 'Movie'));
+  }
+  
+  // Odstraň duplicity
+  return [...new Set(variants)];
 }
 
 /** 🆕 NOVÁ FUNKCE: Čti IMDb data z __NEXT_DATA__ JSON */
