@@ -1,11 +1,11 @@
 # ČSFD Scraper
 
-[![Scrape CSFD](https://github.com/ludivitto/csfd-chatgpt/actions/workflows/scrape.yml/badge.svg)](https://github.com/ludivitto/csfd-chatgpt/actions/workflows/scrape.yml)
+[![Daily CSFD Update](https://github.com/ludivitto/csfd-chatgpt/actions/workflows/daily.yml/badge.svg)](https://github.com/ludivitto/csfd-chatgpt/actions/workflows/daily.yml)
 [![Latest CSV](https://img.shields.io/badge/data-csfd__ratings.csv-blue)](https://raw.githubusercontent.com/ludivitto/csfd-chatgpt/main/data/csfd_ratings.csv)
 
-This repository contains a GitHub Actions workflow that automatically scrapes all my movie and TV show ratings from [ČSFD](https://www.csfd.cz/) and saves them into a CSV file.
+This repository contains an **intelligent incremental scraper** that automatically detects and adds new movie and TV show ratings from [ČSFD](https://www.csfd.cz/) to the dataset.
 
-The scraper also enriches the dataset with **IMDb links** and **original titles** using **intelligent automatic search** when direct links aren't available, plus advanced optimizations for performance and reliability.
+The system uses **smart incremental updates** - instead of scraping everything every time, it only processes new ratings, making it **60x faster** (2-5 minutes vs 3+ hours) while maintaining complete data accuracy.
 
 ## ❓ Why
 The purpose of this project is to **feed ChatGPT with my ratings** so I can simply ask questions like:
@@ -32,18 +32,21 @@ Instead of browsing ČSFD manually, I can now query my dataset directly.
 
 ## 🚀 How
 
-### 🤖 GitHub Actions Workflow
-- **Automatic run**: Every Monday at 03:00 UTC (`cron: "0 3 * * 1"`)
+### 🤖 Intelligent Daily Workflow
+- **Automatic run**: Every day at 02:00 UTC (03:00 CET) - **incremental mode**
+- **Smart scheduling**: Automatically adjusts frequency based on activity:
+  - **0 new items**: Daily checks (3 pages)
+  - **1-5 new items**: Daily checks (5 pages)  
+  - **6-20 new items**: Twice daily (8 pages)
+  - **20+ new items**: Every 6 hours (10 pages)
 - **Manual trigger**: Via GitHub Actions tab with mode selection:
-  - 🚀 **ultra-fast** (~30s) - parsing only, no enrichment
-  - 🧪 **test-small** (~2min) - 10 items with full details
-  - 📄 **test-medium** (~5min) - 2 pages
-  - 📋 **test-large** (~15min) - 5 pages
-  - 🏭 **production** (3+ hrs) - complete dataset
-- **Smart commit**: Only commits when data actually changes
+  - 🚀 **incremental** (~2-5min) - Fast new items check (default)
+  - 🔍 **full-check** (~10-15min) - Extended check (more pages)
+  - 🏭 **force-full** (3+ hrs) - Complete re-scrape (manual only)
+  - 🧪 **test** (~1min) - Quick test mode
+- **Smart commit**: Only commits when new items are found
+- **Auto-backup**: Creates backup before any changes
 - **Verbose logging**: Optional detailed logging
-- **Debug artifacts**: Auto-uploads screenshots and HTML for analysis on errors
-- **Robust**: Continues even with individual page failures
 
 ### Using the data
 - Open the CSV directly via the **blue badge** above

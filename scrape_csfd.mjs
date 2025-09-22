@@ -456,7 +456,7 @@ async function extractDirectorOnPage(page) {
       }
     }
     
-    // Fallback - hledej v textu
+    // Fallback - hledej v textu "Režie:"
     const text = await page.$eval('body', el => el.textContent);
     const match = text.match(/[Rr]ežie:\s*([^,\n]+)/);
     if (match) return match[1].trim();
