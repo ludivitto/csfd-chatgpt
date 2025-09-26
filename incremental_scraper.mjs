@@ -274,7 +274,7 @@ async function enrichNewItems(context, items) {
       } catch {}
 
       // Extrakce dat (zjednodušené verze z hlavního scraperu)
-      await extractBasicDetails(page, item);
+      await extractBasicDetails(page, item, context);
       
       await page.close();
       await sleep(config.delays.detail);
@@ -288,8 +288,166 @@ async function enrichNewItems(context, items) {
   return items;
 }
 
+/** 🆕 IMDB VYHLEDÁVÁNÍ (zjednodušené z hlavního scraperu) */
+async function searchImdbByTitle(originalTitle, year, context) {
+  if (!originalTitle || originalTitle.length < 2) return { imdb_id: "", imdb_url: "" };
+  
+  const cleanedTitle = cleanTitle(originalTitle);
+  if (!cleanedTitle) return { imdb_id: "", imdb_url: "" };
+  
+  try {
+    log(`[imdb-search] Searching for: "${cleanedTitle}" (${year})`);
+    
+    const result = await performImdbSearch(cleanedTitle, year, context);
+    
+    if (result) {
+      log(`[imdb-search] Found: ${result.title} (${result.year}) - ${result.imdb_id}`);
+      return { imdb_id: result.imdb_id, imdb_url: result.imdb_url };
+    }
+    
+    log(`[imdb-search] No results found for "${cleanedTitle}"`);
+    
+  } catch (e) {
+    log(`[imdb-search] Failed to search: ${e.message}`);
+  }
+  
+  return { imdb_id: "", imdb_url: "" };
+}
+
+/** 🆕 NOVÁ FUNKCE: Provede skutečné IMDB vyhledávání */
+async function performImdbSearch(searchTitle, year, context) {
+  const page = await context.newPage();
+  
+  try {
+    const searchUrl = `https://www.imdb.com/find/?q=${encodeURIComponent(searchTitle)}&ref_=nv_sr_sm`;
+    
+    await page.goto(searchUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await sleep(2000);
+    
+    // 🆕 NOVÝ PŘÍSTUP: Čti data z __NEXT_DATA__ JSON
+    let result = await tryImdbJsonData(page, searchTitle, year);
+    
+    return result;
+  } finally {
+    await page.close();
+  }
+}
+
+/** 🆕 NOVÁ FUNKCE: Čti IMDb data z __NEXT_DATA__ JSON */
+async function tryImdbJsonData(page, searchTitle, targetYear) {
+  try {
+    const result = await page.evaluate(({ title, year }) => {
+      // Najdi __NEXT_DATA__ script tag
+      const script = document.querySelector('script#__NEXT_DATA__');
+      if (!script) return null;
+      
+      try {
+        const data = JSON.parse(script.textContent);
+        
+        // Projdi titleResults v JSON data
+        const titleResults = data?.props?.pageProps?.titleResults?.results || [];
+        
+        // 🆕 VYLEPŠENÁ LOGIKA: Seřaď výsledky podle relevance
+        const scoredResults = [];
+        
+        for (const item of titleResults.slice(0, 10)) { // Zkontroluj prvních 10 výsledků
+          const itemTitle = item.titleNameText || item.titleText?.text || item.titleText || '';
+          const itemYear = item.titleReleaseText || item.releaseYear?.year || item.releaseYear || '';
+          const imdbId = item.id || '';
+          
+          if (!imdbId || !imdbId.startsWith('tt')) continue;
+          
+          let score = 0;
+          
+          // Kontrola roku (pokud je specifikován)
+          const yearMatch = !year || !itemYear || itemYear.toString() === year.toString();
+          if (yearMatch) score += 100; // Vysoká priorita pro shodu roku
+          
+          // Kontrola shody názvu (case insensitive, partial match)
+          const titleLower = title.toLowerCase();
+          const itemTitleLower = itemTitle.toLowerCase();
+          
+          if (titleLower === itemTitleLower) {
+            score += 200; // Perfektní shoda
+          } else if (itemTitleLower.includes(titleLower)) {
+            score += 150; // Název obsahuje hledaný text
+          } else if (titleLower.includes(itemTitleLower)) {
+            score += 100; // Hledaný text obsahuje název
+          } else {
+            // Částečná shoda slov
+            const titleWords = titleLower.split(/\s+/);
+            const itemWords = itemTitleLower.split(/\s+/);
+            const matchingWords = titleWords.filter(word => 
+              itemWords.some(itemWord => itemWord.includes(word) || word.includes(itemWord))
+            );
+            score += matchingWords.length * 20;
+          }
+          
+          if (score > 0) {
+            scoredResults.push({
+              imdb_id: imdbId,
+              imdb_url: `https://www.imdb.com/title/${imdbId}/`,
+              title: itemTitle,
+              year: itemYear.toString(),
+              score: score
+            });
+          }
+        }
+        
+        // Seřaď podle skóre (nejvyšší první) a vrať nejlepší výsledek
+        if (scoredResults.length > 0) {
+          scoredResults.sort((a, b) => b.score - a.score);
+          return scoredResults[0];
+        }
+        
+        // Pokud nenajde přesný match, zkus první výsledek s podobným názvem
+        for (const item of titleResults.slice(0, 3)) {
+          const itemTitle = item.titleNameText || item.titleText?.text || item.titleText || '';
+          const imdbId = item.id || '';
+          
+          if (imdbId && imdbId.startsWith('tt') && 
+              (itemTitle.toLowerCase().includes(title.toLowerCase()) || 
+               title.toLowerCase().includes(itemTitle.toLowerCase()))) {
+            return {
+              imdb_id: imdbId,
+              imdb_url: `https://www.imdb.com/title/${imdbId}/`,
+              title: itemTitle,
+              year: (item.titleReleaseText || item.releaseYear?.year || '').toString()
+            };
+          }
+        }
+        
+      } catch (e) {
+        console.warn('Failed to parse __NEXT_DATA__ JSON:', e);
+      }
+      
+      return null;
+    }, { title: searchTitle, year: targetYear });
+    
+    if (result) {
+      log(`[imdb-json] Found via JSON: ${result.title} (${result.year}) - ${result.imdb_id}`);
+    }
+    
+    return result;
+  } catch (e) {
+    log(`[imdb-json] JSON parsing failed: ${e.message}`);
+    return null;
+  }
+}
+
+/** 🆕 NOVÁ FUNKCE: Vyčistí název pro vyhledávání */
+function cleanTitle(title) {
+  if (!title) return "";
+  
+  return title
+    .trim()
+    .replace(/\s*\(více\)\s*$/i, '')  // Odstraň "(více)" na konci
+    .replace(/\s+/g, ' ')             // Normalizuj mezery
+    .trim();
+}
+
 // Zjednodušená extrakce základních detailů
-async function extractBasicDetails(page, item) {
+async function extractBasicDetails(page, item, context) {
   try {
     // IMDb - rozšířená extrakce
     const imdbData = await extractImdbOnPage(page);
@@ -304,6 +462,28 @@ async function extractBasicDetails(page, item) {
       const text = await originalEl.textContent();
       if (text) {
         item.original_title = text.trim().replace(/\s*\(více\)\s*$/i, '');
+      }
+    }
+
+    // 🆕 FALLBACK: Hledej IMDb přes český název (priorita)
+    if (!item.imdb_id && item.title) {
+      log(`[fallback] Searching IMDb by Czech title: "${item.title}"`);
+      const searchResult = await searchImdbByTitle(item.title, item.year, context);
+      if (searchResult.imdb_id) {
+        item.imdb_id = searchResult.imdb_id;
+        item.imdb_url = searchResult.imdb_url;
+        log(`[fallback] Found IMDb via Czech title search: ${item.imdb_id}`);
+      }
+    }
+
+    // 🆕 FALLBACK: Hledej IMDb přes originální název (pokud český název neuspěl)
+    if (!item.imdb_id && item.original_title) {
+      log(`[fallback] Searching IMDb by original title: "${item.original_title}"`);
+      const searchResult = await searchImdbByTitle(item.original_title, item.year, context);
+      if (searchResult.imdb_id) {
+        item.imdb_id = searchResult.imdb_id;
+        item.imdb_url = searchResult.imdb_url;
+        log(`[fallback] Found IMDb via original title search: ${item.imdb_id}`);
       }
     }
     

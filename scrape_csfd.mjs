@@ -699,26 +699,57 @@ async function tryImdbJsonData(page, searchTitle, targetYear) {
         // Projdi titleResults v JSON data
         const titleResults = data?.props?.pageProps?.titleResults?.results || [];
         
-        for (const item of titleResults.slice(0, 5)) { // Zkontroluj prvních 5 výsledků
-          const itemTitle = item.titleText?.text || item.titleText || '';
-          const itemYear = item.releaseYear?.year || item.releaseYear || '';
+        // 🆕 VYLEPŠENÁ LOGIKA: Seřaď výsledky podle relevance
+        const scoredResults = [];
+        
+        for (const item of titleResults.slice(0, 10)) { // Zkontroluj prvních 10 výsledků
+          const itemTitle = item.titleNameText || item.titleText?.text || item.titleText || '';
+          const itemYear = item.titleReleaseText || item.releaseYear?.year || item.releaseYear || '';
           const imdbId = item.id || '';
           
-          // Kontrola shody názvu (case insensitive, partial match)
-          const titleMatch = itemTitle.toLowerCase().includes(title.toLowerCase()) ||
-                           title.toLowerCase().includes(itemTitle.toLowerCase());
+          if (!imdbId || !imdbId.startsWith('tt')) continue;
+          
+          let score = 0;
           
           // Kontrola roku (pokud je specifikován)
           const yearMatch = !year || !itemYear || itemYear.toString() === year.toString();
+          if (yearMatch) score += 100; // Vysoká priorita pro shodu roku
           
-          if (titleMatch && yearMatch && imdbId && imdbId.startsWith('tt')) {
-            return {
+          // Kontrola shody názvu (case insensitive, partial match)
+          const titleLower = title.toLowerCase();
+          const itemTitleLower = itemTitle.toLowerCase();
+          
+          if (titleLower === itemTitleLower) {
+            score += 200; // Perfektní shoda
+          } else if (itemTitleLower.includes(titleLower)) {
+            score += 150; // Název obsahuje hledaný text
+          } else if (titleLower.includes(itemTitleLower)) {
+            score += 100; // Hledaný text obsahuje název
+          } else {
+            // Částečná shoda slov
+            const titleWords = titleLower.split(/\s+/);
+            const itemWords = itemTitleLower.split(/\s+/);
+            const matchingWords = titleWords.filter(word => 
+              itemWords.some(itemWord => itemWord.includes(word) || word.includes(itemWord))
+            );
+            score += matchingWords.length * 20;
+          }
+          
+          if (score > 0) {
+            scoredResults.push({
               imdb_id: imdbId,
               imdb_url: `https://www.imdb.com/title/${imdbId}/`,
               title: itemTitle,
-              year: itemYear.toString()
-            };
+              year: itemYear.toString(),
+              score: score
+            });
           }
+        }
+        
+        // Seřaď podle skóre (nejvyšší první) a vrať nejlepší výsledek
+        if (scoredResults.length > 0) {
+          scoredResults.sort((a, b) => b.score - a.score);
+          return scoredResults[0];
         }
         
         // Pokud nenajde přesný match, zkus první výsledek s podobným názvem
@@ -1105,14 +1136,25 @@ async function enrichWithDetails(context, items) {
               original_title = await extractOriginalTitleOnPage(page);
           }
 
-          // 🆕 FALLBACK: Hledej IMDb přes originální název
+          // 🆕 FALLBACK: Hledej IMDb přes český název (priorita)
+          if (!imdb_id && it.title) {
+            if (config.flags.verbose) console.log(`[fallback] Searching IMDb by Czech title: "${it.title}"`);
+            const searchResult = await searchImdbByTitle(it.title, it.year, context);
+            if (searchResult.imdb_id) {
+              imdb_id = searchResult.imdb_id;
+              imdb_url = searchResult.imdb_url;
+              if (config.flags.verbose) console.log(`[fallback] Found IMDb via Czech title search: ${imdb_id}`);
+            }
+          }
+
+          // 🆕 FALLBACK: Hledej IMDb přes originální název (pokud český název neuspěl)
           if (!imdb_id && original_title) {
-            if (config.flags.verbose) console.log(`[fallback] Searching IMDb by title: "${original_title}"`);
+            if (config.flags.verbose) console.log(`[fallback] Searching IMDb by original title: "${original_title}"`);
             const searchResult = await searchImdbByTitle(original_title, it.year, context);
             if (searchResult.imdb_id) {
               imdb_id = searchResult.imdb_id;
               imdb_url = searchResult.imdb_url;
-              if (config.flags.verbose) console.log(`[fallback] Found IMDb via search: ${imdb_id}`);
+              if (config.flags.verbose) console.log(`[fallback] Found IMDb via original title search: ${imdb_id}`);
             }
           }
 
