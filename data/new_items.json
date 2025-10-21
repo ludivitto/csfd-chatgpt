@@ -1,17 +1,32 @@
 [
   {
-    "title": "Mimo zákon",
-    "year": "1986",
-    "type": "film",
-    "rating": "5",
-    "ratingDate": "19.10.2025",
-    "url": "https://www.csfd.cz/film/4743-mimo-zakon/",
-    "imdb_id": "tt0090967",
-    "imdb_url": "https://www.imdb.com/title/tt0090967/",
-    "original_title": "Down by Law",
-    "genre": "Komedie / Drama / Krimi",
-    "director": "Jim Jarmusch",
-    "cast": "Tom Waits, John Lurie, Roberto Benigni, Nicoletta Braschi, Ellen Barkin, Richard Boes, Pruitt Taylor Vince, Joy N. Houck Jr.",
-    "description": "Ve vězeňské cele se díky nečekaným okolnostem setkávají nezaměstnaný dýdžej Zack, příležitostný pasák Jack a excentricky popletený italský turista Roberto."
+    "title": "Imawa no kuni no Alice - Season 1",
+    "year": "2020",
+    "type": "season",
+    "rating": "4",
+    "ratingDate": "20.10.2025",
+    "url": "https://www.csfd.cz/film/922892-imawa-no-kuni-no-alice/922893-season-1/",
+    "imdb_id": "tt13056398",
+    "imdb_url": "https://www.imdb.com/title/tt13056398/",
+    "original_title": "",
+    "genre": "Fantasy / Sci-Fi / Thriller",
+    "director": "Šinsuke Sató",
+    "cast": "Tao Cučija, Kento Jamazaki, Rihito Itagaki, Takehiro Ócuki, Šóhei Abe, Kjótaró Tamura, Ajase, Karen Izumi",
+    "description": ""
+  },
+  {
+    "title": "Imawa no kuni no Alice - Season 3",
+    "year": "2025",
+    "type": "season",
+    "rating": "4",
+    "ratingDate": "20.10.2025",
+    "url": "https://www.csfd.cz/film/922892-imawa-no-kuni-no-alice/1651537-season-3/",
+    "imdb_id": "tt38614200",
+    "imdb_url": "https://www.imdb.com/title/tt38614200/",
+    "original_title": "",
+    "genre": "Fantasy / Sci-Fi / Thriller",
+    "director": "Šinsuke Sató",
+    "cast": "",
+    "description": ""
   }
 ]
