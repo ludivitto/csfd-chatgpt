@@ -1,20 +1,5 @@
 [
   {
-    "title": "Požáry",
-    "year": "2010",
-    "type": "film",
-    "rating": "5",
-    "ratingDate": "28.10.2025",
-    "url": "https://www.csfd.cz/film/284780-pozary/",
-    "imdb_id": "tt1255953",
-    "imdb_url": "https://www.imdb.com/title/tt1255953/",
-    "original_title": "Incendies",
-    "genre": "Drama / Mysteriózní / Válečný",
-    "director": "Denis Villeneuve",
-    "cast": "Rémy Girard, Lubna Azabal, Mélissa Désormeaux-Poulin, Maxim Gaudette, Mohamed Majd, Ahmad Massad, Dominique Briand, Frédéric Paquet",
-    "description": "Stará matka umírá a v závěti odkazuje svým dvěma dětem úkol: najít svého otce (o kterém si mysleli, že zemřel v libanonské občanské válce) a svého bratra (o kterém neměli tušení)."
-  },
-  {
     "title": "Přežijí jen milenci",
     "year": "2013",
     "type": "film",

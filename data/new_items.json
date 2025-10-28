@@ -1,17 +1,17 @@
 [
   {
-    "title": "Přežijí jen milenci",
-    "year": "2013",
+    "title": "Požáry",
+    "year": "2010",
     "type": "film",
     "rating": "5",
-    "ratingDate": "27.10.2025",
-    "url": "https://www.csfd.cz/film/297635-preziji-jen-milenci/",
-    "imdb_id": "tt1714915",
-    "imdb_url": "https://www.imdb.com/title/tt1714915/",
-    "original_title": "Only Lovers Left Alive",
-    "genre": "Drama / Horor / Romantický",
-    "director": "Jim Jarmusch",
-    "cast": "Tom Hiddleston, Tilda Swinton, Anton Yelchin, Mia Wasikowska, John Hurt, Jeffrey Wright, Slimane Dazi, Georges Claisse",
-    "description": "Adam - talentovaný hudebník ve stylu 60. let, žije v ponurém Detroitu. Zoufalý z toho, kam ten svět spěje, čím dál častěji přemýšlí o sebevraždě."
+    "ratingDate": "28.10.2025",
+    "url": "https://www.csfd.cz/film/284780-pozary/",
+    "imdb_id": "tt1255953",
+    "imdb_url": "https://www.imdb.com/title/tt1255953/",
+    "original_title": "Incendies",
+    "genre": "Drama / Mysteriózní / Válečný",
+    "director": "Denis Villeneuve",
+    "cast": "Rémy Girard, Lubna Azabal, Mélissa Désormeaux-Poulin, Maxim Gaudette, Mohamed Majd, Ahmad Massad, Dominique Briand, Frédéric Paquet",
+    "description": "Stará matka umírá a v závěti odkazuje svým dvěma dětem úkol: najít svého otce (o kterém si mysleli, že zemřel v libanonské občanské válce) a svého bratra (o kterém neměli tušení)."
   }
 ]
