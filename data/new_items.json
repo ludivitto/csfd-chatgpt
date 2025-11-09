@@ -1,17 +1,32 @@
 [
   {
-    "title": "Panna a netvor",
-    "year": "1978",
-    "type": "film",
+    "title": "Pluribus - Pirátka",
+    "year": "2025",
+    "type": "episode",
     "rating": "5",
-    "ratingDate": "30.10.2025",
-    "url": "https://www.csfd.cz/film/4238-panna-a-netvor/",
-    "imdb_id": "tt0078054",
-    "imdb_url": "https://www.imdb.com/title/tt0078054/",
-    "original_title": "Panna a netvor",
-    "genre": "Pohádka / Horor / Mysteriózní / Fantasy / Drama / Romantický",
-    "director": "Juraj Herz",
-    "cast": "Zdena Studenková, Vlastimil Harapes, Václav Voska, Jana Brejchová, Zuzana Kocúriková, Josef Laufer, Milan Hein, Marta Hrachovinová",
-    "description": "Slavnou strašidelnou pohádku, původně francouzskou, o princi začarovaném do děsivé zvířecí podoby, jehož vysvobodí až čistá láska, využil režisér Juraj Herz k vizuálně působivé podívané, která těží z ..."
+    "ratingDate": "08.11.2025",
+    "url": "https://www.csfd.cz/film/1513493-pluribus/1710078-piratka/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Pirate Lady",
+    "genre": "Sci-Fi / Drama",
+    "director": "Vince Gilligan",
+    "cast": "Rhea Seehorn, Karolina Wydra, Samba Schutte, Menik Gooneratne, Max Reeves, Olivia Rouyre, Viji Nathan, Phuong Kubacki",
+    "description": "Zvláštně povědomá tvář seznamuje Carol s bizarním novým světem. Na shromáždění v Evropě se setkají naprosto neznámí lidé, což je zdrojem neshod."
+  },
+  {
+    "title": "Pluribus - My jsme my",
+    "year": "2025",
+    "type": "episode",
+    "rating": "5",
+    "ratingDate": "08.11.2025",
+    "url": "https://www.csfd.cz/film/1513493-pluribus/1710077-my-jsme-my/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "We Is Us",
+    "genre": "Sci-Fi / Drama",
+    "director": "Vince Gilligan",
+    "cast": "Rhea Seehorn, Miriam Shor, Peter Bergman, Karan Soni, Allan McLeod, Woody Fu, Blair Beeken, Eric Steinig",
+    "description": "Astronomický objev převrátí planetu vzhůru nohama. Carol Sturkovou, věčně nabručenou spisovatelku, tento podivný nový svět děsí."
   }
 ]
