@@ -1,20 +1,5 @@
 [
   {
-    "title": "Frankenstein",
-    "year": "2025",
-    "type": "film",
-    "rating": "3",
-    "ratingDate": "09.11.2025",
-    "url": "https://www.csfd.cz/film/1329633-frankenstein/",
-    "imdb_id": "",
-    "imdb_url": "",
-    "original_title": "Frankenstein",
-    "genre": "Drama / Horor / Fantasy / Sci-Fi",
-    "director": "Guillermo del Toro",
-    "cast": "Oscar Isaac, Mia Goth, Jacob Elordi, Christoph Waltz, Charles Dance, David Bradley, Lars Mikkelsen, Christian Convery",
-    "description": "Oscarem oceněný režisér Guillermo del Toro adaptuje klasický příběh Mary Shelleyové o Victoru Frankensteinovi, geniálním, ale egoistickém vědci, který v monstrózním experimentu přivede k životu stvoře..."
-  },
-  {
     "title": "Pluribus - Pirátka",
     "year": "2025",
     "type": "episode",

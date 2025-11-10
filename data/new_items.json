@@ -1,32 +1,17 @@
 [
   {
-    "title": "Pluribus - Pirátka",
+    "title": "Frankenstein",
     "year": "2025",
-    "type": "episode",
-    "rating": "5",
-    "ratingDate": "08.11.2025",
-    "url": "https://www.csfd.cz/film/1513493-pluribus/1710078-piratka/",
+    "type": "film",
+    "rating": "3",
+    "ratingDate": "09.11.2025",
+    "url": "https://www.csfd.cz/film/1329633-frankenstein/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Pirate Lady",
-    "genre": "Sci-Fi / Drama",
-    "director": "Vince Gilligan",
-    "cast": "Rhea Seehorn, Karolina Wydra, Samba Schutte, Menik Gooneratne, Max Reeves, Olivia Rouyre, Viji Nathan, Phuong Kubacki",
-    "description": "Zvláštně povědomá tvář seznamuje Carol s bizarním novým světem. Na shromáždění v Evropě se setkají naprosto neznámí lidé, což je zdrojem neshod."
-  },
-  {
-    "title": "Pluribus - My jsme my",
-    "year": "2025",
-    "type": "episode",
-    "rating": "5",
-    "ratingDate": "08.11.2025",
-    "url": "https://www.csfd.cz/film/1513493-pluribus/1710077-my-jsme-my/",
-    "imdb_id": "",
-    "imdb_url": "",
-    "original_title": "We Is Us",
-    "genre": "Sci-Fi / Drama",
-    "director": "Vince Gilligan",
-    "cast": "Rhea Seehorn, Miriam Shor, Peter Bergman, Karan Soni, Allan McLeod, Woody Fu, Blair Beeken, Eric Steinig",
-    "description": "Astronomický objev převrátí planetu vzhůru nohama. Carol Sturkovou, věčně nabručenou spisovatelku, tento podivný nový svět děsí."
+    "original_title": "Frankenstein",
+    "genre": "Drama / Horor / Fantasy / Sci-Fi",
+    "director": "Guillermo del Toro",
+    "cast": "Oscar Isaac, Mia Goth, Jacob Elordi, Christoph Waltz, Charles Dance, David Bradley, Lars Mikkelsen, Christian Convery",
+    "description": "Oscarem oceněný režisér Guillermo del Toro adaptuje klasický příběh Mary Shelleyové o Victoru Frankensteinovi, geniálním, ale egoistickém vědci, který v monstrózním experimentu přivede k životu stvoře..."
   }
 ]
