@@ -351,9 +351,10 @@ async function tryImdbJsonData(page, searchTitle, targetYear) {
         const scoredResults = [];
         
         for (const item of titleResults.slice(0, 10)) { // Zkontroluj prvních 10 výsledků
-          const itemTitle = item.titleNameText || item.titleText?.text || item.titleText || '';
-          const itemYear = item.titleReleaseText || item.releaseYear?.year || item.releaseYear || '';
-          const imdbId = item.id || '';
+          // 🆕 NOVÁ STRUKTURA IMDB (listopad 2025)
+          const itemTitle = item.listItem?.originalTitleText || item.titleNameText || item.titleText?.text || item.titleText || '';
+          const itemYear = item.listItem?.releaseYear || item.titleReleaseText || item.releaseYear?.year || item.releaseYear || '';
+          const imdbId = item.index || item.id || '';
           
           if (!imdbId || !imdbId.startsWith('tt')) continue;
           
@@ -402,8 +403,9 @@ async function tryImdbJsonData(page, searchTitle, targetYear) {
         
         // Pokud nenajde přesný match, zkus první výsledek s podobným názvem
         for (const item of titleResults.slice(0, 3)) {
-          const itemTitle = item.titleNameText || item.titleText?.text || item.titleText || '';
-          const imdbId = item.id || '';
+          // 🆕 NOVÁ STRUKTURA IMDB (listopad 2025)
+          const itemTitle = item.listItem?.originalTitleText || item.titleNameText || item.titleText?.text || item.titleText || '';
+          const imdbId = item.index || item.id || '';
           
           if (imdbId && imdbId.startsWith('tt') && 
               (itemTitle.toLowerCase().includes(title.toLowerCase()) || 
@@ -412,7 +414,7 @@ async function tryImdbJsonData(page, searchTitle, targetYear) {
               imdb_id: imdbId,
               imdb_url: `https://www.imdb.com/title/${imdbId}/`,
               title: itemTitle,
-              year: (item.titleReleaseText || item.releaseYear?.year || '').toString()
+              year: (item.listItem?.releaseYear || item.titleReleaseText || item.releaseYear?.year || '').toString()
             };
           }
         }
