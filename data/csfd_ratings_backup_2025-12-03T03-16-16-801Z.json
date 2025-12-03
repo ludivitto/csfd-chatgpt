@@ -1,35 +1,5 @@
 [
   {
-    "title": "Grinch",
-    "year": "2018",
-    "type": "film",
-    "rating": "3",
-    "ratingDate": "02.12.2025",
-    "url": "https://www.csfd.cz/film/360067-grinch/prehled/",
-    "imdb_id": "tt2709692",
-    "imdb_url": "https://www.imdb.com/title/tt2709692/",
-    "original_title": "The Grinch",
-    "genre": "Animovaný / Komedie / Rodinný / Fantasy",
-    "director": "Yarrow Cheney",
-    "cast": "Benedict Cumberbatch, Rashida Jones, Pharrell Williams, Angela Lansbury, Kenan Thompson, Cameron Seely, Ramone Hamilton, Tristan O'Hare",
-    "description": "Na světě se překvapivě najde spousta lidí, kteří Vánoce nemají rádi. Mezi nimi všemi vyniká Grinch, věčně rozmrzelý zelený chlupatec, jemuž naprosto vyhovuje samotaření v jeskyni, kde se nechává obska..."
-  },
-  {
-    "title": "Antologie Beatles",
-    "year": "1995",
-    "type": "series",
-    "rating": "5",
-    "ratingDate": "02.12.2025",
-    "url": "https://www.csfd.cz/film/75833-antologie-beatles/prehled/",
-    "imdb_id": "tt0111893",
-    "imdb_url": "https://www.imdb.com/title/tt0111893/",
-    "original_title": "The Beatles Anthology",
-    "genre": "Dokumentární / Hudební",
-    "director": "Bob Smeaton",
-    "cast": "The Beatles, John Lennon, Paul McCartney, George Harrison, Ringo Starr, George Martin, Brian Epstein, Neil Aspinall",
-    "description": "Rozsáhlý projekt dokumentující historii hudební skupiny The Beatles je vyprávěn pomocí exkluzivních rozhovorů s členy skupiny Georgem Harrisonem, Paulem McCartneym a Ringo Starrem."
-  },
-  {
     "title": "Pluribus - Pili mléko",
     "year": "2025",
     "type": "episode",
