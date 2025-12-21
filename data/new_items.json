@@ -1,17 +1,32 @@
 [
   {
-    "title": "Pluribus - Úžina",
+    "title": "TO: Vítejte v Derry - Série 1",
     "year": "2025",
-    "type": "episode",
+    "type": "season",
     "rating": "4",
-    "ratingDate": "15.12.2025",
-    "url": "https://www.csfd.cz/film/1513493-pluribus/1710083-uzina/prehled/",
-    "imdb_id": "tt1844577",
-    "imdb_url": "https://www.imdb.com/title/tt1844577/",
-    "original_title": "The Gap",
-    "genre": "Sci-Fi / Drama",
-    "director": "Adam Bernstein",
-    "cast": "Rhea Seehorn, Karolina Wydra, Carlos Manuel Vesga",
-    "description": "Manousos se vydává na nebezpečný trek za Carol. Po návratu domů z Las Vegas Carol dodá svému odboji na vynalézavosti."
+    "ratingDate": "20.12.2025",
+    "url": "https://www.csfd.cz/film/1393489-to-vitejte-v-derry/1593247-serie-1/prehled/",
+    "imdb_id": "tt37875198",
+    "imdb_url": "https://www.imdb.com/title/tt37875198/",
+    "original_title": "",
+    "genre": "Horor",
+    "director": "Andy Muschietti",
+    "cast": "Bill Skarsgård, Taylour Paige, Jovan Adepo, Chris Chalk, James Remar, Madeleine Stowe, Stephen Rider, Chad Rook",
+    "description": ""
+  },
+  {
+    "title": "TO: Vítejte v Derry",
+    "year": "2025",
+    "type": "series",
+    "rating": "4",
+    "ratingDate": "20.12.2025",
+    "url": "https://www.csfd.cz/film/1393489-to-vitejte-v-derry/prehled/",
+    "imdb_id": "tt38818291",
+    "imdb_url": "https://www.imdb.com/title/tt38818291/",
+    "original_title": "IT: Welcome to Derry",
+    "genre": "Horor",
+    "director": "Andy Muschietti",
+    "cast": "Bill Skarsgård, Taylour Paige, Jovan Adepo, Chris Chalk, James Remar, Madeleine Stowe, Stephen Rider, Chad Rook",
+    "description": "Tento děsivý prequel se vrací do roku 1962 a sleduje původ vražedné, měnící se bytosti známé jako klaun Pennywise."
   }
 ]
