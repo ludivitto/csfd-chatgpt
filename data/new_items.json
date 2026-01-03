@@ -1,17 +1,47 @@
 [
   {
-    "title": "Stranger Things - Kapitola osmá: Nohama na zemi",
+    "title": "Neporazitelný - Série 3",
     "year": "2025",
-    "type": "episode",
+    "type": "season",
     "rating": "5",
-    "ratingDate": "01.01.2026",
-    "url": "https://www.csfd.cz/film/430582-stranger-things/1545807-kapitola-osma-nohama-na-zemi/prehled/",
-    "imdb_id": "tt21914684",
-    "imdb_url": "https://www.imdb.com/title/tt21914684/",
-    "original_title": "Chapter Eight: The Rightside Up",
-    "genre": "Drama / Fantasy / Horor / Mysteriózní / Sci-Fi / Thriller",
-    "director": "Matt Duffer",
-    "cast": "Winona Ryder, David Harbour, Millie Bobby Brown, Finn Wolfhard, Gaten Matarazzo, Caleb McLaughlin, Natalia Dyer, Charlie Heaton",
-    "description": "Vecna se chystá zničit svět a přátelé musí riskovat všechno, aby ho jednou provždy zastavili."
+    "ratingDate": "02.01.2026",
+    "url": "https://www.csfd.cz/film/930640-neporazitelny/1540591-serie-3/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "",
+    "genre": "Animovaný / Akční / Dobrodružný / Sci-Fi / Thriller",
+    "director": "Dan Duncan",
+    "cast": "Steven Yeun, J.K. Simmons, Sandra Oh, Christian Convery, Simu Liu, Xolo Maridueña, Walton Goggins, Jason Mantzoukas",
+    "description": "Když se Mark musí postavit svojí minulosti i budoucnosti, nic už není jako dřív. A aby toho nebylo málo, po cestě zjišťuje, jak daleko ještě bude muset zajít, aby ochránil ty, které miluje."
+  },
+  {
+    "title": "Neporazitelný - Série 2",
+    "year": "2023",
+    "type": "season",
+    "rating": "4",
+    "ratingDate": "02.01.2026",
+    "url": "https://www.csfd.cz/film/930640-neporazitelny/1024297-serie-2/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "",
+    "genre": "Animovaný / Akční / Dobrodružný / Sci-Fi / Thriller",
+    "director": "Haylee Herrick",
+    "cast": "Steven Yeun, Madison Calderon, Taylor Dearden, J.K. Simmons, Sandra Oh, Chris Diamantopoulos, Grey Griffin, Lauren Cohan",
+    "description": ""
+  },
+  {
+    "title": "The Mighty Nein",
+    "year": "2025",
+    "type": "series",
+    "rating": "5",
+    "ratingDate": "02.01.2026",
+    "url": "https://www.csfd.cz/film/1711454-the-mighty-nein/prehled/",
+    "imdb_id": "tt26453092",
+    "imdb_url": "https://www.imdb.com/title/tt26453092/",
+    "original_title": "The Mighty Nein",
+    "genre": "Animovaný / Akční / Dobrodružný / Fantasy / Komedie",
+    "director": "Eugene Lee",
+    "cast": "Laura Bailey, Liam O'Brien, Marisha Ray, Matthew Mercer, Sam Riegel, Travis Willingham, Taliesin Jaffe, Ashley Johnson",
+    "description": "Skupina outsiderů, zločinců a ztroskotanců se nachomýtne k záchraně kontinentu poté, co tajemná relikvie schopná pozměnit realitu padne do špatných rukou. (Prime Video)"
   }
 ]
