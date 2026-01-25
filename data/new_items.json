@@ -1,17 +1,32 @@
 [
   {
-    "title": "Landman - Season 2",
+    "title": "Pluribus - Season 1",
     "year": "2025",
     "type": "season",
+    "rating": "5",
+    "ratingDate": "24.01.2026",
+    "url": "https://www.csfd.cz/film/1513493-pluribus/1710075-season-1/prehled/",
+    "imdb_id": "tt39077387",
+    "imdb_url": "https://www.imdb.com/title/tt39077387/",
+    "original_title": "",
+    "genre": "Sci-Fi / Drama",
+    "director": "Vince Gilligan",
+    "cast": "Rhea Seehorn, Karolina Wydra, Miriam Shor, Peter Bergman, Karan Soni, Allan McLeod, Woody Fu, Blair Beeken",
+    "description": ""
+  },
+  {
+    "title": "Pluribus",
+    "year": "2025",
+    "type": "series",
     "rating": "4",
     "ratingDate": "24.01.2026",
-    "url": "https://www.csfd.cz/film/1205573-landman/1649991-season-2/prehled/",
-    "imdb_id": "tt39142505",
-    "imdb_url": "https://www.imdb.com/title/tt39142505/",
-    "original_title": "",
-    "genre": "Drama",
-    "director": "Stephen Kay",
-    "cast": "Billy Bob Thornton, Ali Larter, Jacob Lofland, Demi Moore, Michelle Randolph, Kayla Wallace, James Jordan, Colm Feore",
-    "description": ""
+    "url": "https://www.csfd.cz/film/1513493-pluribus/prehled/",
+    "imdb_id": "tt22202452",
+    "imdb_url": "https://www.imdb.com/title/tt22202452/",
+    "original_title": "Pluribus",
+    "genre": "Sci-Fi / Drama",
+    "director": "Vince Gilligan",
+    "cast": "Rhea Seehorn, Karolina Wydra, Miriam Shor, Samba Schutte, Peter Bergman, Karan Soni, Allan McLeod, Woody Fu",
+    "description": "Ten nejzkroušenější člověk pod sluncem musí zachránit svět před štěstím."
   }
 ]
