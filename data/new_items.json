@@ -1,17 +1,17 @@
 [
   {
-    "title": "Jednotka",
+    "title": "Velký Marty",
     "year": "2025",
-    "type": "series",
+    "type": "film",
     "rating": "4",
-    "ratingDate": "26.01.2026",
-    "url": "https://www.csfd.cz/film/1562600-jednotka/prehled/",
-    "imdb_id": "",
-    "imdb_url": "",
-    "original_title": "Jednotka",
-    "genre": "Drama / Krimi",
-    "director": "Jeremiah Zagar",
-    "cast": "Mark Ruffalo, Tom Pelphrey, Owen Teague, Fabien Frankel, Emilia Jones, Thuso Mbedu, Alison Oliver, Sam Keeley",
-    "description": "Agent FBI stojí v čele vyšetřování brutálních loupeží, za nimiž překvapivě stojí nenápadný rodinný typ se skrytou temnou stránkou."
+    "ratingDate": "31.01.2026",
+    "url": "https://www.csfd.cz/film/1580030-velky-marty/prehled/",
+    "imdb_id": "tt32916440",
+    "imdb_url": "https://www.imdb.com/title/tt32916440/",
+    "original_title": "Marty Supreme",
+    "genre": "Drama / Sportovní",
+    "director": "Josh Safdie",
+    "cast": "Timothée Chalamet, Odessa A'zion, Gwyneth Paltrow, Kevin O'Leary, Tyler the Creator, Abel Ferrara, Fran Drescher, Luke Manley",
+    "description": "Film Velký Marty sleduje Martyho Mausera, mladého snílka z New Yorku roku 1952, který je posedlý stát se světovým šampionem ve stolním tenise, v té době ne příliš atraktivním sportu."
   }
 ]
