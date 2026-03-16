@@ -1,17 +1,32 @@
 [
   {
-    "title": "Válečné monstrum",
+    "title": "One Piece - Season 1",
+    "year": "2023",
+    "type": "season",
+    "rating": "4",
+    "ratingDate": "15.03.2026",
+    "url": "https://www.csfd.cz/film/1104392-one-piece/1114761-season-1/prehled/",
+    "imdb_id": "tt11737520",
+    "imdb_url": "https://www.imdb.com/title/tt11737520/",
+    "original_title": "",
+    "genre": "Akční / Dobrodružný / Fantasy / Komedie / Drama",
+    "director": "Marc Jobst",
+    "cast": "Makkenjú Arata, Emily Rudd, Iñaki Godoy, Vincent Regan, Jeff Ward, Morgan Davies, Ian McShane, Aidan Scott",
+    "description": ""
+  },
+  {
+    "title": "One Piece - Season 2",
     "year": "2026",
-    "type": "film",
-    "rating": "3",
-    "ratingDate": "14.03.2026",
-    "url": "https://www.csfd.cz/film/1688944-valecne-monstrum/prehled/",
-    "imdb_id": "tt15940132",
-    "imdb_url": "https://www.imdb.com/title/tt15940132/",
-    "original_title": "War Machine",
-    "genre": "Akční / Sci-Fi / Thriller",
-    "director": "Patrick Hughes",
-    "cast": "Alan Ritchson, Stephan James, Dennis Quaid, Esai Morales, Jai Courtney, Alex King, Keiynan Lonsdale, Jack Patten",
-    "description": "Cvičení elitního týmu se v poslední fázi náboru do armádních jednotek Rangers změní v boj o život s něčím, co si nikdo neuměl ani představit."
+    "type": "season",
+    "rating": "4",
+    "ratingDate": "15.03.2026",
+    "url": "https://www.csfd.cz/film/1104392-one-piece/1421250-season-2/prehled/",
+    "imdb_id": "tt29540753",
+    "imdb_url": "https://www.imdb.com/title/tt29540753/",
+    "original_title": "",
+    "genre": "Akční / Dobrodružný / Fantasy / Komedie / Drama",
+    "director": "Emma Sullivan",
+    "cast": "Makkenjú Arata, Emily Rudd, Iñaki Godoy, McKinley Belcher III, David Dastmalchian, Morgan Davies, Michael Dorman, Craig Fairbrass",
+    "description": ""
   }
 ]
