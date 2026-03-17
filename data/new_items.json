@@ -1,32 +1,17 @@
 [
   {
-    "title": "One Piece - Season 1",
-    "year": "2023",
-    "type": "season",
+    "title": "Black Mirror: Bandersnatch",
+    "year": "2018",
+    "type": "film",
     "rating": "4",
-    "ratingDate": "15.03.2026",
-    "url": "https://www.csfd.cz/film/1104392-one-piece/1114761-season-1/prehled/",
-    "imdb_id": "tt11737520",
-    "imdb_url": "https://www.imdb.com/title/tt11737520/",
+    "ratingDate": "16.03.2026",
+    "url": "https://www.csfd.cz/film/681615-black-mirror-bandersnatch/prehled/",
+    "imdb_id": "tt9495224",
+    "imdb_url": "https://www.imdb.com/title/tt9495224/",
     "original_title": "",
-    "genre": "Akční / Dobrodružný / Fantasy / Komedie / Drama",
-    "director": "Marc Jobst",
-    "cast": "Makkenjú Arata, Emily Rudd, Iñaki Godoy, Vincent Regan, Jeff Ward, Morgan Davies, Ian McShane, Aidan Scott",
-    "description": ""
-  },
-  {
-    "title": "One Piece - Season 2",
-    "year": "2026",
-    "type": "season",
-    "rating": "4",
-    "ratingDate": "15.03.2026",
-    "url": "https://www.csfd.cz/film/1104392-one-piece/1421250-season-2/prehled/",
-    "imdb_id": "tt29540753",
-    "imdb_url": "https://www.imdb.com/title/tt29540753/",
-    "original_title": "",
-    "genre": "Akční / Dobrodružný / Fantasy / Komedie / Drama",
-    "director": "Emma Sullivan",
-    "cast": "Makkenjú Arata, Emily Rudd, Iñaki Godoy, McKinley Belcher III, David Dastmalchian, Morgan Davies, Michael Dorman, Craig Fairbrass",
-    "description": ""
+    "genre": "Drama / Mysteriózní / Sci-Fi",
+    "director": "David Slade",
+    "cast": "Fionn Whitehead, Will Poulter, Alice Lowe, Asim Chaudhry, Craig Parkinson, Tallulah Haddon, Jonathan Aris, Suzanne Burden",
+    "description": "Rok 1984. Stefan (Fionn Whitehead) vyvíjí počítačovou hru založenou na knize „Bandersnatch“, románu, kde vaše rozhodnutí určují příběh."
   }
 ]
