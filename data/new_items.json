@@ -1,17 +1,17 @@
 [
   {
-    "title": "Banda - Série 5",
+    "title": "SOS",
     "year": "2026",
-    "type": "season",
-    "rating": "4",
-    "ratingDate": "23.05.2026",
-    "url": "https://www.csfd.cz/film/657621-banda/1544874-serie-5/prehled/",
-    "imdb_id": "tt35522483",
-    "imdb_url": "https://www.imdb.com/title/tt35522483/",
-    "original_title": "",
-    "genre": "Akční  Komedie  Krimi  Drama  Sci-Fi",
-    "director": "Philip Sgriccia",
-    "cast": "Karl Urban, Jack Quaid, Erin Moriarty, Antony Starr, Reece Presley, Laz Alonso, Tomer Capone, Jessie T. Usher",
-    "description": "Homelander ovládá Ameriku fašistickým terorem a odpůrce zavírá do Táborů svobody. Butcher, Hughie, Annie a Banda proti jeho tyranské vládě vedou zoufalý odboj tváří v tvář naprosto beznadějné přesile."
+    "type": "film",
+    "rating": "3",
+    "ratingDate": "30.05.2026",
+    "url": "https://www.csfd.cz/film/1579476-sos/prehled/",
+    "imdb_id": "tt8036976",
+    "imdb_url": "https://www.imdb.com/title/tt8036976/",
+    "original_title": "Send Help\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Thriller  Horor  Komedie",
+    "director": "Sam Raimi",
+    "cast": "Rachel McAdams, Dylan O'Brien, Xavier Samuel, Dennis Haysbert, Chris Pang, Emma Raimi, Thaneth Warakulnukroh, Edyll Ismail",
+    "description": "Dva kolegové uvíznou na opuštěném ostrově jako jediní, kteří přežili havárii letadla. Na ostrově musí překonat minulé křivdy a spolupracovat, aby přežili, ale nakonec jde o souboj vůle a rozumu, aby s..."
   }
 ]
