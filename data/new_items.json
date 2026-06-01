@@ -1,17 +1,17 @@
 [
   {
-    "title": "SOS",
+    "title": "Utajené legendy",
     "year": "2026",
-    "type": "film",
-    "rating": "3",
-    "ratingDate": "30.05.2026",
-    "url": "https://www.csfd.cz/film/1579476-sos/prehled/",
-    "imdb_id": "tt8036976",
-    "imdb_url": "https://www.imdb.com/title/tt8036976/",
-    "original_title": "Send Help\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Thriller  Horor  Komedie",
-    "director": "Sam Raimi",
-    "cast": "Rachel McAdams, Dylan O'Brien, Xavier Samuel, Dennis Haysbert, Chris Pang, Emma Raimi, Thaneth Warakulnukroh, Edyll Ismail",
-    "description": "Dva kolegové uvíznou na opuštěném ostrově jako jediní, kteří přežili havárii letadla. Na ostrově musí překonat minulé křivdy a spolupracovat, aby přežili, ale nakonec jde o souboj vůle a rozumu, aby s..."
+    "type": "series",
+    "rating": "5",
+    "ratingDate": "31.05.2026",
+    "url": "https://www.csfd.cz/film/1837151-utajene-legendy/prehled/",
+    "imdb_id": "tt33265765",
+    "imdb_url": "https://www.imdb.com/title/tt33265765/",
+    "original_title": "Legends",
+    "genre": "Krimi  Drama",
+    "director": "Brady Hood",
+    "cast": "Tom Burke, Steve Coogan, Tom Hughes, Charlotte Ritchie, Hayley Squires, Douglas Hodge, Aml Ameen, Jasmine Blackborow",
+    "description": "Britské ulice zaplaví v 90. letech drogy. Tým obyčejných úředníků proto bez přípravy vyrazí na tajnou misi s cílem zničit gangy pašeráků a dealerů."
   }
 ]
