@@ -1,17 +1,32 @@
 [
   {
-    "title": "Utajené legendy",
-    "year": "2026",
-    "type": "series",
+    "title": "Přísahám, že za to nemůžu",
+    "year": "2025",
+    "type": "film",
     "rating": "5",
-    "ratingDate": "31.05.2026",
-    "url": "https://www.csfd.cz/film/1837151-utajene-legendy/prehled/",
-    "imdb_id": "tt33265765",
-    "imdb_url": "https://www.imdb.com/title/tt33265765/",
-    "original_title": "Legends",
-    "genre": "Krimi  Drama",
-    "director": "Brady Hood",
-    "cast": "Tom Burke, Steve Coogan, Tom Hughes, Charlotte Ritchie, Hayley Squires, Douglas Hodge, Aml Ameen, Jasmine Blackborow",
-    "description": "Britské ulice zaplaví v 90. letech drogy. Tým obyčejných úředníků proto bez přípravy vyrazí na tajnou misi s cílem zničit gangy pašeráků a dealerů."
+    "ratingDate": "03.06.2026",
+    "url": "https://www.csfd.cz/film/1703542-prisaham-ze-za-to-nemuzu/prehled/",
+    "imdb_id": "tt31514146",
+    "imdb_url": "https://www.imdb.com/title/tt31514146/",
+    "original_title": "I Swear\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama  Životopisný",
+    "director": "Kirk Jones",
+    "cast": "Robert Aramayo, Maxine Peake, Shirley Henderson, Scott Ellis Watson, Peter Mullan, Ron Donachie, Francesco Piacentini-Smith, David Carlyle",
+    "description": "Britský film Přísahám, že za to nemůžu je natočený podle skutečného příběhu Johna Davidsona. Vypráví intimní a silný příběh o jeho zpočátku bezstarostném dospívání ukončeném drsným odcizením, kdy je o..."
+  },
+  {
+    "title": "Rod Draka - Regent",
+    "year": "2024",
+    "type": "episode",
+    "rating": "4",
+    "ratingDate": "02.08.2024",
+    "url": "https://www.csfd.cz/film/785031-rod-draka/1252639-vladar/prehled/",
+    "imdb_id": "tt15766340",
+    "imdb_url": "https://www.imdb.com/title/tt15766340/",
+    "original_title": "Regent\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Akční  Fantasy  Drama  Dobrodružný",
+    "director": "Clare Kilner",
+    "cast": "Olivia Cooke, Emma D'Arcy, Matt Smith, Steve Toussaint, Sonoja Mizuno, Fabien Frankel, Jefferson Hall, Matthew Needham",
+    "description": "Zatímco Zelení zvažují, jak zaplnit prázdné místo v Aegonově radě, Daemon se snaží přesvědčit Brackeny, aby poklekli. (Max)"
   }
 ]
