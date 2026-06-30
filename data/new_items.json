@@ -1,17 +1,32 @@
 [
   {
-    "title": "Tiché znamení",
-    "year": "2024",
+    "title": "My vás naučíme",
+    "year": "2026",
+    "type": "series",
+    "rating": "4",
+    "ratingDate": "29.06.2026",
+    "url": "https://www.csfd.cz/film/1853775-my-vas-naucime/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Chamgyoyuk\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Akční  Drama  Thriller  Komedie",
+    "director": "Jong-chan Hong",
+    "cast": "",
+    "description": "Studenti ztratí k učitelům poslední zbytek úcty, a tak nastoupí svérázní inspektoři, co začnou dávat věci do pořádku pomocí drsných postupů, které v osnovách nenajdete."
+  },
+  {
+    "title": "Dům u jezera",
+    "year": "2006",
     "type": "film",
     "rating": "3",
-    "ratingDate": "06.06.2026",
-    "url": "https://www.csfd.cz/film/1480434-tiche-znameni/prehled/",
-    "imdb_id": "tt5672290",
-    "imdb_url": "https://www.imdb.com/title/tt5672290/",
-    "original_title": "Blink Twice\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Thriller  Mysteriózní",
-    "director": "Zoë Kravitz",
-    "cast": "Naomi Ackie, Channing Tatum, Christian Slater, Simon Rex, Adria Arjona, Kyle MacLachlan, Haley Joel Osment, Geena Davis",
-    "description": "Frida je mladá servírka z Los Angeles, která se zajímá o podnikatele Slatera Kinga (Channing Tatum). Na vysněné dovolené na jeho soukromém ostrově se začnou dít podivné věci."
+    "ratingDate": "29.06.2026",
+    "url": "https://www.csfd.cz/film/220734-dum-u-jezera/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "The Lake House\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama  Fantasy  Romantický",
+    "director": "Alejandro Agresti",
+    "cast": "Keanu Reeves, Sandra Bullock, Shohreh Aghdashloo, Willeke van Ammelrooy, Christopher Plummer, Ebon Moss-Bachrach, Dylan Walsh, Lynn Collins",
+    "description": "Doktorka Kate Forster (Sandra Bullock) konečně našla lásku. Bohužel se jedná o vztah na dlouhou vzdálenost. Ona bydlí v centru Chicaga, on na předměstí u jezera."
   }
 ]
