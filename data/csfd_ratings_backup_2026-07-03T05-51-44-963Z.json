@@ -1,35 +1,5 @@
 [
   {
-    "title": "Single Man",
-    "year": "2009",
-    "type": "film",
-    "rating": "4",
-    "ratingDate": "02.07.2026",
-    "url": "https://www.csfd.cz/film/250947-single-man/prehled/",
-    "imdb_id": "tt1315981",
-    "imdb_url": "https://www.imdb.com/title/tt1315981/",
-    "original_title": "A Single Man\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Drama  Psychologický",
-    "director": "Tom Ford",
-    "cast": "Colin Firth, Julianne Moore, Nicholas Hoult, Matthew Goode, Jon Kortajarena, Paulette Lamori, Ryan Simpkins, Ginnifer Goodwin",
-    "description": "Profesor George Falconer (Colin Firth) je vyschlou řekou. Po smrti svého dlouholetého partnera (Matthew Goode) nemůže přijít životu na chuť."
-  },
-  {
-    "title": "Bratr",
-    "year": "1997",
-    "type": "film",
-    "rating": "3",
-    "ratingDate": "02.07.2026",
-    "url": "https://www.csfd.cz/film/37632-bratr/prehled/",
-    "imdb_id": "tt36269305",
-    "imdb_url": "https://www.imdb.com/title/tt36269305/",
-    "original_title": "Brat\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Krimi  Drama",
-    "director": "Alexej Balabanov",
-    "cast": "Sergej Bodrov Jr., Viktor Suchorukov, Světlana Pismičenko, Alexej Polujan, Natalja Lvova, Andrej Krasko, Sergej Děbižev, Sergej Astachov",
-    "description": "Danila je úplně obyčejný mladík. Na svém milovaném discmanu Sony nejraději poslouchá rockovou skupinu Nautilus. Dokončil vojenskou službu v ruské armádě a je nezaměstnaný."
-  },
-  {
     "title": "My vás naučíme",
     "year": "2026",
     "type": "series",
