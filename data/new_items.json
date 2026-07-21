@@ -1,17 +1,17 @@
 [
   {
-    "title": "Mistr a Markétka",
-    "year": "2024",
+    "title": "Odyssea",
+    "year": "2026",
     "type": "film",
-    "rating": "4",
-    "ratingDate": "11.05.2026",
-    "url": "https://www.csfd.cz/film/1450809-mistr-a-marketka/prehled/",
-    "imdb_id": "tt33823124",
-    "imdb_url": "https://www.imdb.com/title/tt33823124/",
-    "original_title": "Master i Margarita\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Drama  Fantasy",
-    "director": "Michael Lockshin",
-    "cast": "Jevgenij Cyganov, Julia Snigir, August Diehl, Claes Bang, Jurij Kolokolnikov, Alexej Guskov, Polina Aug, Makram Khoury",
-    "description": "V Moskvě 30. let je dramatik vyhnán ze Svazu spisovatelů a ocitá se na okraji společnosti. Pod vlivem své múzy Markétky začíná psát nový román – satirický příběh, v němž se všichni jeho pronásledovate..."
+    "rating": "5",
+    "ratingDate": "20.07.2026",
+    "url": "https://www.csfd.cz/film/1580037-odyssea/prehled/",
+    "imdb_id": "tt0246123",
+    "imdb_url": "https://www.imdb.com/title/tt0246123/",
+    "original_title": "The Odyssey\n\t\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Akční  Dobrodružný  Drama  Fantasy  Historický",
+    "director": "Christopher Nolan",
+    "cast": "Matt Damon, Tom Holland, Anne Hathaway, Robert Pattinson, Himesh Patel, Andrew Howard, John Leguizamo, Jon Bernthal",
+    "description": "Odysseus (Matt Damon) byl král řeckého ostrova Ithaka, který dle legend a básníka Homéra vymyslel slavného Trójského koně, jenž výraznou měrou pomohl obelstít obránce Tróji a ukončit tak vyčerpávající..."
   }
 ]
