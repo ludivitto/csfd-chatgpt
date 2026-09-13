@@ -1,17 +1,32 @@
 [
   {
-    "title": "Dámy mají přednost",
-    "year": "2026",
+    "title": "Madam služebná",
+    "year": "2017",
     "type": "film",
     "rating": "3",
-    "ratingDate": "26.08.2026",
-    "url": "https://www.csfd.cz/film/1797414-damy-maji-prednost/prehled/",
+    "ratingDate": "12.09.2026",
+    "url": "https://www.csfd.cz/film/509692-madam-sluzebna/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Ladies First",
-    "genre": "Komedie  Romantický",
-    "director": "Thea Sharrock",
-    "cast": "Sacha Baron Cohen, Rosamund Pike, Emily Mortimer, Charles Dance, Richard E. Grant, Fiona Shaw, Paul Chahidi, Kathryn Hunter",
-    "description": "Arogantní, ale charismatický sukničkář si užívá peníze, moc i vztahy na jednu noc. Jenže pak se probere v paralelním světě, kde vládnou ženy, a všechno bude rázem jinak."
+    "original_title": "Madame\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Komedie  Drama",
+    "director": "Amanda Sthers",
+    "cast": "Toni Collette, Harvey Keitel, Michael Smiley, Joséphine de La Baume, Rossy de Palma, Brendan Patricks, Sonia Rolland, Stanislas Merhar",
+    "description": "Bohatý a dobře situovaný americký pár Anne (Toni Collette) a Bob (Harvey Keitel) se rozhodne okořenit svůj upadající vztah a přestěhuje se do zámku v romantické Paříži."
+  },
+  {
+    "title": "Sasanka",
+    "year": "2025",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "29.10.2025",
+    "url": "https://www.csfd.cz/film/1578537-sasanka/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Anemone\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama",
+    "director": "Ronan Day-Lewis",
+    "cast": "Daniel Day-Lewis, Sean Bean, Samantha Morton, Samuel Bottomley, Safia Oakley-Green, Paul Butterworth, Richard Graham, Adam Fogerty",
+    "description": "Po opětovném setkání dvou odcizených bratrů na chatě hluboko v lesích severní Anglie vychází najevo skrytá tajemství a dlouho potlačovaná zášť. (SkyShowtime)"
   }
 ]
