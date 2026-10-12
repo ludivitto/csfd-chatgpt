@@ -1,5 +1,35 @@
 [
   {
+    "title": "Carrie",
+    "year": "2026",
+    "type": "series",
+    "rating": "4",
+    "ratingDate": "11.10.2026",
+    "url": "https://www.csfd.cz/film/1687407-carrie/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Carrie",
+    "genre": "Horor  Drama",
+    "director": "Mike Flanagan",
+    "cast": "Summer H. Howell, Samantha Sloyan, Siena Agudong, Amber Midthunder, Matthew Lillard, Alison Thornton, Joel Oulette, Arthur Conti",
+    "description": "Po náhlé a nečekané smrti otce, která ji vrhne do nemilosrdného světa státní střední školy, se Carrie musí vyrovnávat s virálním skandálem kolem šikany pronikajícím její komunitou, neúprosným tlakem a..."
+  },
+  {
+    "title": "Dárek do cely č.7",
+    "year": "2013",
+    "type": "film",
+    "rating": "3",
+    "ratingDate": "11.10.2026",
+    "url": "https://www.csfd.cz/film/343198-darek-do-cely-c-7/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "7 beonbangui seonmool\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Komedie  Drama",
+    "director": "Hwan-gyeong Lee",
+    "cast": "",
+    "description": "Mentálně postižený Lee Yong Goo je obviněn z vraždy malé holčičky, pro policii je jasným vrahem a nikoho nezajímá, že všechno mohlo být jinak."
+  },
+  {
     "title": "Lanterns",
     "year": "2026",
     "type": "series",

@@ -1,32 +1,32 @@
 [
   {
-    "title": "Lanterns",
+    "title": "Carrie",
     "year": "2026",
     "type": "series",
     "rating": "4",
-    "ratingDate": "08.10.2026",
-    "url": "https://www.csfd.cz/film/1608318-lanterns/prehled/",
+    "ratingDate": "11.10.2026",
+    "url": "https://www.csfd.cz/film/1687407-carrie/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Lanterns",
-    "genre": "Akční  Sci-Fi  Fantasy  Mysteriózní  Dobrodružný",
-    "director": "James Hawes",
-    "cast": "Kyle Chandler, Aaron Pierre, Nathan Fillion, Kelly Macdonald, Garret Dillahunt, Poorna Jagannathan, Jason Ritter, Nicole Ari Parker",
-    "description": "Seriál sleduje Johna Stewarta a Hala Jordana, dva mezihvězdné policisty zapletené do temné záhady na Zemi."
+    "original_title": "Carrie",
+    "genre": "Horor  Drama",
+    "director": "Mike Flanagan",
+    "cast": "Summer H. Howell, Samantha Sloyan, Siena Agudong, Amber Midthunder, Matthew Lillard, Alison Thornton, Joel Oulette, Arthur Conti",
+    "description": "Po náhlé a nečekané smrti otce, která ji vrhne do nemilosrdného světa státní střední školy, se Carrie musí vyrovnávat s virálním skandálem kolem šikany pronikajícím její komunitou, neúprosným tlakem a..."
   },
   {
-    "title": "Komorná",
-    "year": "2016",
+    "title": "Dárek do cely č.7",
+    "year": "2013",
     "type": "film",
-    "rating": "4",
-    "ratingDate": "07.10.2026",
-    "url": "https://www.csfd.cz/film/398043-komorna/prehled/",
+    "rating": "3",
+    "ratingDate": "11.10.2026",
+    "url": "https://www.csfd.cz/film/343198-darek-do-cely-c-7/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Agasshi\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Drama  Mysteriózní  Romantický  Thriller",
-    "director": "Chan-wook Park",
-    "cast": "Min-hee Kim, Tae-ri Kim, Jeong-woo Ha, Jin-woong Cho, Hae-sook Kim, Yong-nyeo Lee, So-ri Moon, Eun-hyung Jo",
-    "description": "Šlechtična Hideko žije v ústraní na venkovském panství se svým strýcem a poručníkem. Chlípný strýc vychovává Hideko přísnou rukou a čeká, až dospěje, aby si ji mohl vzít a zmocnit se jejího bohatství."
+    "original_title": "7 beonbangui seonmool\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Komedie  Drama",
+    "director": "Hwan-gyeong Lee",
+    "cast": "",
+    "description": "Mentálně postižený Lee Yong Goo je obviněn z vraždy malé holčičky, pro policii je jasným vrahem a nikoho nezajímá, že všechno mohlo být jinak."
   }
 ]
