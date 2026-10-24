@@ -1,32 +1,32 @@
 [
   {
-    "title": "Carrie",
+    "title": "Minotaur",
     "year": "2026",
-    "type": "series",
+    "type": "film",
     "rating": "4",
-    "ratingDate": "11.10.2026",
-    "url": "https://www.csfd.cz/film/1687407-carrie/prehled/",
+    "ratingDate": "24.10.2026",
+    "url": "https://www.csfd.cz/film/1524436-minotaur/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Carrie",
-    "genre": "Horor  Drama",
-    "director": "Mike Flanagan",
-    "cast": "Summer H. Howell, Samantha Sloyan, Siena Agudong, Amber Midthunder, Matthew Lillard, Alison Thornton, Joel Oulette, Arthur Conti",
-    "description": "Po náhlé a nečekané smrti otce, která ji vrhne do nemilosrdného světa státní střední školy, se Carrie musí vyrovnávat s virálním skandálem kolem šikany pronikajícím její komunitou, neúprosným tlakem a..."
+    "original_title": "Minotaure\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama  Thriller  Krimi",
+    "director": "Andrej Zvjagincev",
+    "cast": "Dmitrij Mazurov, Iris Lebeděva, Varvara Šmykova, Yuriy Zavalnyouk, Anatolij Bělyj, Artur Smoljaninov, Juris Žagars, Vladimir Friedman",
+    "description": "Rusko, rok 2022. Úspěšný podnikatel Gleb (Dmitrij Mazurov) žije se svou ženou Galinou (Iris Lebedeva) a jejich malým synem v krásném domě u vody."
   },
   {
-    "title": "Dárek do cely č.7",
-    "year": "2013",
+    "title": "Deadpool & Wolverine",
+    "year": "2024",
     "type": "film",
-    "rating": "3",
-    "ratingDate": "11.10.2026",
-    "url": "https://www.csfd.cz/film/343198-darek-do-cely-c-7/prehled/",
+    "rating": "4",
+    "ratingDate": "18.08.2024",
+    "url": "https://www.csfd.cz/film/942759-deadpool-a-wolverine/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "7 beonbangui seonmool\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Komedie  Drama",
-    "director": "Hwan-gyeong Lee",
-    "cast": "",
-    "description": "Mentálně postižený Lee Yong Goo je obviněn z vraždy malé holčičky, pro policii je jasným vrahem a nikoho nezajímá, že všechno mohlo být jinak."
+    "original_title": "Deadpool & Wolverine\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Akční  Komedie  Sci-Fi",
+    "director": "Shawn Levy",
+    "cast": "Ryan Reynolds, Hugh Jackman, Emma Corrin, Matthew Macfadyen, Rob Delaney, Jon Favreau, Morena Baccarin, Leslie Uggams",
+    "description": "Wolverine se zotavuje ze zranění, když se setká s hláškujícím Deadpoolem. Spojí se, aby porazili společného nepřítele. (Falcon)"
   }
 ]

@@ -1,5 +1,35 @@
 [
   {
+    "title": "Minotaur",
+    "year": "2026",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "24.10.2026",
+    "url": "https://www.csfd.cz/film/1524436-minotaur/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Minotaure\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama  Thriller  Krimi",
+    "director": "Andrej Zvjagincev",
+    "cast": "Dmitrij Mazurov, Iris Lebeděva, Varvara Šmykova, Yuriy Zavalnyouk, Anatolij Bělyj, Artur Smoljaninov, Juris Žagars, Vladimir Friedman",
+    "description": "Rusko, rok 2022. Úspěšný podnikatel Gleb (Dmitrij Mazurov) žije se svou ženou Galinou (Iris Lebedeva) a jejich malým synem v krásném domě u vody."
+  },
+  {
+    "title": "Deadpool & Wolverine",
+    "year": "2024",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "18.08.2024",
+    "url": "https://www.csfd.cz/film/942759-deadpool-a-wolverine/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "Deadpool & Wolverine\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Akční  Komedie  Sci-Fi",
+    "director": "Shawn Levy",
+    "cast": "Ryan Reynolds, Hugh Jackman, Emma Corrin, Matthew Macfadyen, Rob Delaney, Jon Favreau, Morena Baccarin, Leslie Uggams",
+    "description": "Wolverine se zotavuje ze zranění, když se setká s hláškujícím Deadpoolem. Spojí se, aby porazili společného nepřítele. (Falcon)"
+  },
+  {
     "title": "Carrie",
     "year": "2026",
     "type": "series",
