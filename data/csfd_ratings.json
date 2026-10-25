@@ -1,5 +1,20 @@
 [
   {
+    "title": "Pozvání",
+    "year": "2026",
+    "type": "film",
+    "rating": "4",
+    "ratingDate": "24.10.2026",
+    "url": "https://www.csfd.cz/film/1670293-pozvani/prehled/",
+    "imdb_id": "",
+    "imdb_url": "",
+    "original_title": "The Invite\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Komedie  Drama",
+    "director": "Olivia Wilde",
+    "cast": "Olivia Wilde, Seth Rogen, Edward Norton, Penélope Cruz",
+    "description": "Joe a Angela procházejí krizí a jejich manželství visí na vlásku. Když jednou večer pozvou na večeři své záhadné sousedy z horního patra, zdánlivě nevinné setkání se začne ubírat nečekaným směrem."
+  },
+  {
     "title": "Minotaur",
     "year": "2026",
     "type": "film",
