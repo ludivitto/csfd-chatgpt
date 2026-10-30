@@ -1,32 +1,17 @@
 [
   {
-    "title": "Neviditelný host",
-    "year": "2016",
+    "title": "Uvidíš všechno",
+    "year": "2026",
     "type": "film",
     "rating": "5",
-    "ratingDate": "28.10.2026",
-    "url": "https://www.csfd.cz/film/457067-neviditelny-host/prehled/",
+    "ratingDate": "30.10.2026",
+    "url": "https://www.csfd.cz/film/1899627-uvidis-vsechno/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "Contratiempo\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Mysteriózní  Krimi  Thriller  Drama",
-    "director": "Oriol Paulo",
-    "cast": "Mario Casas, Ana Wagener, José Coronado, Bárbara Lennie, Francesc Orella, Paco Tous, David Selvas, Manel Dueso",
-    "description": "Podnikatel roku pan Adrián Doria (Mario Casas) má vážné problémy. Je totiž obviněný z vraždy své milenky fotografky Laury (Bárbara Lennie)."
-  },
-  {
-    "title": "Na východ od ráje",
-    "year": "2026",
-    "type": "series",
-    "rating": "4",
-    "ratingDate": "28.10.2026",
-    "url": "https://www.csfd.cz/film/1705702-na-vychod-od-raje/prehled/",
-    "imdb_id": "",
-    "imdb_url": "",
-    "original_title": "East of Eden",
-    "genre": "Drama",
-    "director": "Garth Davis",
-    "cast": "Florence Pugh, Ciarán Hinds, Martha Plimpton, Christopher Abbott, Hoon Lee, Mike Faist, Joseph Zada, Tracy Letts",
-    "description": "Je začátek 20. století a silně emancipovaná žena rozdmýchává konflikt mezi dvěma bratry. Odstartuje tím ságu, která potrvá dvě generace."
+    "original_title": "You Can See Everything\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Dokumentární",
+    "director": "Nathan Fielder",
+    "cast": "Elizabeth Holmes, Nathan Fielder, Billy Evans, Amanda Seyfried, Christopher Abbott, Lance Oppenheim",
+    "description": "Říkali jí ženský Steve Jobs. Elizabeth Holmes, zakladatelka biotechnologického startupu Theranos, vystoupala na samotný vrchol Silicon Valley, dokud její lži nevyšly najevo."
   }
 ]
