@@ -1,17 +1,17 @@
 [
   {
-    "title": "Uvidíš všechno",
-    "year": "2026",
-    "type": "film",
-    "rating": "5",
-    "ratingDate": "30.10.2026",
-    "url": "https://www.csfd.cz/film/1899627-uvidis-vsechno/prehled/",
+    "title": "Mělas to vědět",
+    "year": "2020",
+    "type": "series",
+    "rating": "4",
+    "ratingDate": "01.11.2026",
+    "url": "https://www.csfd.cz/film/774865-melas-to-vedet/prehled/",
     "imdb_id": "",
     "imdb_url": "",
-    "original_title": "You Can See Everything\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
-    "genre": "Dokumentární",
-    "director": "Nathan Fielder",
-    "cast": "Elizabeth Holmes, Nathan Fielder, Billy Evans, Amanda Seyfried, Christopher Abbott, Lance Oppenheim",
-    "description": "Říkali jí ženský Steve Jobs. Elizabeth Holmes, zakladatelka biotechnologického startupu Theranos, vystoupala na samotný vrchol Silicon Valley, dokud její lži nevyšly najevo."
+    "original_title": "The Undoing\n\t\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t\t\tvíce",
+    "genre": "Drama  Thriller",
+    "director": "Susanne Bier",
+    "cast": "Nicole Kidman, Hugh Grant, Donald Sutherland, Édgar Ramírez, Noah Jupe, Lily Rabe, Matilda De Angelis, Ismael Cruz Cordova",
+    "description": "Šestidílná minisérie Mělas to vědět od scénáristy Davida E. Kelleyho (Sedmilhářky) a režisérky Susanne Bierové (Noční recepční) pojednává o úspěšné terapeutce Grace Fraserové (Nicole Kidmanová), jejím..."
   }
 ]
